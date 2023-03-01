@@ -1,23 +1,21 @@
-# Topic 1 - Introduction and RGB-D Data
+# Introduction
 
-## Introduction
-
-### What this project is about?
+## What this project is about?
 The Machine Perception project is about learning to work with more unusual data: 
 
-### Schedule
+## Schedule
 
-### Passing requirements
+## Passing requirements
 
-### FAQ
+## FAQ
 
-## RGB-D Data
+# RGB-D Data
 
-### Example data
+## Example data
 
-### How to load depth images
+## How to load depth images
 
-### How to preview depth data
+## How to preview depth data
 
-### Depth in deep learning
+## Depth in deep learning
 

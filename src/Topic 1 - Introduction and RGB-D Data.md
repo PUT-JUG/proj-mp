@@ -48,7 +48,7 @@ The projects will be about using deep learning with the data and tools that you'
 
 # RGB-D Data
 
-> **_IMPORTANT:_**  Before proceeding to the rest of this instrucion, start downloading this file: 
+> **_IMPORTANT:_**  Before proceeding to the rest of this instrucion, start downloading this file: https://chmura.put.poznan.pl/s/SnJSLZYvvxX6gaI
 
 
 An RGB-D image is actually a pair of images, one usual RGB image, and one corresponding depth image.
@@ -102,6 +102,7 @@ Clone this project from GitHub: https://github.com/isl-org/redwood-3dscan and ru
    ```
 
     The result should look like this:
+    
     ![chair](_images/chair.png)
 
 As you can see, the real-world data is not so perfect. What are the black artifacts on the depth image? [Read how a depth camera works](https://en.wikipedia.org/wiki/Range_imaging).
@@ -117,7 +118,7 @@ A greater problem occurs when we want to scale the image. Try scaling down the d
 We have to use the NEAREST method, otherwise, there are depth values, that never were there in the first place.
 
 # DIY Task 1
-Download dataset from (you should have downloaded it earlier, so it is probably already on your PC):
+Download dataset from (you should have downloaded it earlier, so it is probably already on your PC): https://chmura.put.poznan.pl/s/SnJSLZYvvxX6gaI
 
 Prepare simple classification CNN (you can choose the framework, although [PyTorch](https://pytorch.org/) is suggested) using only the depth images. Separate the dataset to train and validation subsets.
 

@@ -198,7 +198,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud
 Converting between the ROS's sensor_msgs/PointCloud2 class and the point cloud template pcl::PointCloud\<PointT> class can be done with [`pcl::fromROSMsg`](http://docs.ros.org/en/indigo/api/pcl_conversions/html/namespacepcl.html#af662c7d46db4cf6f7cfdc2aaf4439760) and [`pcl::toROSMsg`](http://docs.ros.org/en/indigo/api/pcl_conversions/html/namespacepcl.html#af2c39730f92ade1603c55d45265e386d) from `pcl_conversions` package.
 
 ## PCD (Point Cloud Data)
-[PCD (Point Cloud Data)](https://pointclouds.org/documentation/tutorials/pcd_file_format.html) is the primary data format in PCL. It was created because existing formats did not support some of the features provided by the PCL library. Point cloud can be saved in .pcd format with `pcl::io::savePCDFile` function. Point clouds saved in `.pcd` format can be displayed with the use of `pcl_viewer` command line tool from `pcl_tools` package. You can test it by downloading the example `.pcd` file and running the `pcl_viewer`:
+[PCD (Point Cloud Data)](https://pointclouds.org/documentation/tutorials/pcd_file_format.html) is the primary data format in PCL. Point cloud can be saved in .pcd format with `pcl::io::savePCDFile` function. Point clouds saved in `.pcd` format can be displayed with the use of `pcl_viewer` command line tool from `pcl_tools` package. You can test it by downloading the example `.pcd` file and running the `pcl_viewer`:
 ```bash
 wget https://raw.githubusercontent.com/PointCloudLibrary/pcl/master/test/bunny.pcd
 pcl_viewer bunny.pcd
@@ -299,7 +299,7 @@ source devel/setup.bash
 
 > **NOTE:**  Keep in mind that both PCL and OpenCV had to be installed and configured for the project.
 
-The task is to fill the pixels of an image with the range values from LiDAR point cloud to create a range image. The sensor data is from [ouster OS1-128](https://data.ouster.io/downloads/datasheets/datasheet-rev7-v3p0-os1.pdf) LiDAR. The dimensions of the image (1024x128) refer to the parameters of used LiDAR sensor (horizontal resolution: 1024, vertical resolution: 128).
+The task is to fill the pixels of an image with the range values from the LiDAR point cloud to create a range image. The sensor data is from [ouster OS1-128](https://data.ouster.io/downloads/datasheets/datasheet-rev7-v3p0-os1.pdf) LiDAR. Dimensions of the image (1024x128) refer to the parameters of the used LiDAR sensor (horizontal resolution: 1024, vertical resolution: 128).
 
 1. Open `src/ex1.cpp` file from cloned package directory.
 2. Calculate the horizontal and vertical angle of the laser beam for each point. Points outside of the vertical field of view of the sensor ($\pm$ 22.5 $^\circ$) should be discarded.
@@ -328,9 +328,9 @@ Expected result:
 Your task is to detect the cones in the cloud and estimate their center points. The LiDAR data was simulated and recorded from the [Formula Student Driverless Simulator](https://fs-driverless.github.io/Formula-Student-Driverless-Simulator/v2.2.0/).
 
 1. Open `src/ex2.cpp` file from the cloned package.
-2. Complete `filter` function to downsample the point cloud with voxel filter. Use [`pcl::VoxelGrid`](https://pointclouds.org/documentation/classpcl_1_1_voxel_grid.html) class. The leaf size can be set with `.setLeafSize` method. Observe how different leaf size values affect the output cloud.
-3. Complete `remove_ground` function to remove ground from the point cloud, to be able to segment the cones in the next steps. You could just limit the value of points in `Z` axis, but to get familiar with PCL, fit the plane to the point cloud with [RANSAC](https://en.wikipedia.org/wiki/Random_sample_consensus) algorithm using [pcl::SACSegmentation](https://pointclouds.org/documentation/classpcl_1_1_s_a_c_segmentation.html) and extract "inlier points" from the original cloud with [pcl::ExtractIndices](https://pointclouds.org/documentation/classpcl_1_1_extract_indices_3_01pcl_1_1_p_c_l_point_cloud2_01_4.html).
-4. Complete `get_cluster_indices` function. Use euclidan clustering ([pcl::EuclideanClusterExtraction](https://pointclouds.org/documentation/classpcl_1_1_euclidean_cluster_extraction.html)) to get cones clusters. Make the function return the vector of cluster indices.
+2. Complete the `filter` function to downsample the point cloud with a voxel filter. Use [`pcl::VoxelGrid`](https://pointclouds.org/documentation/classpcl_1_1_voxel_grid.html) class. The leaf size can be set with the `.setLeafSize` method. Observe how different leaf size values affect the output cloud.
+3. Complete the `remove_ground` function to remove the ground from the point cloud, to be able to segment the cones in the next steps. Since it is the data from simulation with perfectly flat ground, you could just limit the value of points in the `Z` axis, but to get familiar with PCL, fit the plane to the point cloud with [RANSAC](https://en.wikipedia.org/wiki/Random_sample_consensus) algorithm using [pcl::SACSegmentation](https://pointclouds.org/documentation/classpcl_1_1_s_a_c_segmentation.html) and extract "inlier points" from the original cloud with [pcl::ExtractIndices](https://pointclouds.org/documentation/classpcl_1_1_extract_indices_3_01pcl_1_1_p_c_l_point_cloud2_01_4.html).
+4. Complete the `get_cluster_indices` function. Use euclidean clustering ([pcl::EuclideanClusterExtraction](https://pointclouds.org/documentation/classpcl_1_1_euclidean_cluster_extraction.html)) to get cones clusters.
 5. Complete `get_cones_centers_cloud` by calculating the average position of points in each cone cluster. You can calculate the average of each dimension manually or use [pcl::CentroidPoint](http://pointclouds.org/documentation/classpcl_1_1_centroid_point.html). Append the calculated average points to the `output_cones_cloud`. Keep in mind that `output_cluster_indices` is a vector of `pcl::PointIndices`. Single `pcl::PointIndices` has point indices from a single cluster (`pcl::PointIndices.indices` - another vector). 
 6. To check the results run the roslaunch and playback the data from `fsds_lidar.bag`:
 

@@ -299,9 +299,9 @@ source devel/setup.bash
 
 > **NOTE:**  Keep in mind that both PCL and OpenCV had to be installed and configured for the project.
 
-The task is to fill the pixels of an image with the range values from the LiDAR point cloud to create a range image. The sensor data is from [ouster OS1-128](https://data.ouster.io/downloads/datasheets/datasheet-rev7-v3p0-os1.pdf) LiDAR. Dimensions of the image (1024x128) refer to the parameters of the used LiDAR sensor (horizontal resolution: 1024, vertical resolution: 128).
+The range image is an image of which every pixel is a distance (range) between the obstaccle and the sensor. The task is to fill the pixels of an image with the range values from the LiDAR point cloud to create a range image. The sensor data is from [ouster OS1-128](https://data.ouster.io/downloads/datasheets/datasheet-rev7-v3p0-os1.pdf) LiDAR. Dimensions of the image (1024x128) refer to the parameters of the used LiDAR sensor (horizontal resolution: 1024, vertical resolution: 128).
 
-1. Open `src/ex1.cpp` file from cloned package directory.
+1. Open `src/ex1.cpp` file from cloned package (I suggest remote explorer extension to VS code to attach to a running container).
 2. Calculate the horizontal and vertical angle of the laser beam for each point. Points outside of the vertical field of view of the sensor ($\pm$ 22.5 $^\circ$) should be discarded.
 3. Calculate the pixel location on the image for each point.
 4. Calculate the range value for each point. If the value of range is higher than 50 m, set it to 50 m.

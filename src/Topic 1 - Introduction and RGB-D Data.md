@@ -130,3 +130,6 @@ If you have finished the first task, report to the teacher. You will receive a d
 
 
 [1]: <https://en.wikipedia.org/wiki/Depth_map> "Depth image on wikipedia"
+
+---
+<sub>Author: Kamil Młodzikowski</sub>

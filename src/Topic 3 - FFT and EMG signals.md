@@ -99,7 +99,7 @@ Define the accuracy of reconstruction as the root mean square error (RMSE):
    RMSE=\sum_{i=0}^N \frac{1}{N}\cdot \sqrt{(s(i)- Re(\hat{x} i))^2}
    $$
 
-3. Load data form a file containing [EMG signals](https://chmura.put.poznan.pl/s/G285gnQVuCnfQAx/download?path=%2FData-HDF5&files=emg_gestures-12-repeats_short-2018-04-12-14-05-19-091.hdf5). The signal sampling frequency is 5120Hz, and the file contains recordings from 24 channels of EMG from the forearm muscles during various hand gestures. In further analysis, use the `EMG_15` channel.
+3. Load data form a file containing [EMG signals](https://chmura.put.poznan.pl/s/G285gnQVuCnfQAx/download?path=%2FData-HDF5&files=emg_gestures-12-repeats_short-2018-04-12-14-05-19-091.hdf5) using pandas. The signal sampling frequency is 5120Hz, and the file contains recordings from 24 channels of EMG from the forearm muscles during various hand gestures. In further analysis, use the `EMG_15` channel.
    - Identify the frequencies of the 3 strongest components with an impulse spectrum.
    - Try to perform 10-time downsampling (selecting every 10th sample of the signal), plot the original and downsampled spectra on one figure, and try to explain the observed differences.
 
@@ -127,7 +127,7 @@ EMG signal can be processed many different ways. In the field of classification 
 In the current exercise, we rely on several basic amplitude features determined in a moving window:
 1. RMS value for a channel `i`:
 $$
-RMS_i=\sqrt{\frac{\sum_{i=1}^{n}\left(x_{i}-x_{0}\right)^{2}}{n}},
+RMS_i=\sqrt{\frac{\sum_{j=1}^{n}\left(x_{i+j}-x_{i}\right)^{2}}{n}},
 $$
 
 RMS results on a moving window are presented here:
@@ -136,9 +136,11 @@ RMS results on a moving window are presented here:
 
 2. Number of zero-crossings
    $$
-   ZC= \sum\limits_{i=1}^{N-2}u[(x_{i+1}-x_{i})(x_{i+1}-x_{i+2})]
+   ZC= \frac{1}{2}\sum\limits_{i=2}^{N} |sign(a_i) - sign(a_{i-1})|
    $$
-   in a threshold using approach, you can calculate it on corssing the threshold
+   where `sign(x)` returns `1` if x is positive and `0` otherwise.
+
+   In a threshold using approach, you can calculate it on corssing the threshold
 3. Activity detection
    
    The value of zero-crossings, after considering the dead zone, can be used to determin the begining of the contraction.

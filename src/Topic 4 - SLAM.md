@@ -3,7 +3,7 @@
 # A-LOAM
 LOAM is a standard 3D laser localization method introduced in [LOAM: Lidar Odometry and Mapping in Real-time](http://www.roboticsproceedings.org/rss10/p07.pdf). It is focused on minimizing drift in odometry estimation and it does not involve a loop closure mechanism. The original code is not available anymore since the authors made it not public anymore, creating [kaarta](https://www.kaarta.com/) company. We will instead use [A-LOAM](https://github.com/HKUST-Aerial-Robotics/A-LOAM) - Advanced implementation of LOAM. It uses Eigen and Ceres Solver to simplify and create a clean code structure, which makes it a perfect learning material for SLAM beginners. In short, LOAM takes only point clouds as input. Based on them, it estimates the odometry by scan registration and maps the environment.
 
-# Excercises
+# TODO:
 ## Docker container setup
 A-LOAM implementation makes use of some dependencies e.g., CERES and PCL, so for convenience, the docker image with all installed dependencies was prepared. You can check the Dockerfile [here](https://github.com/MichalNowicki/LabARM/blob/main/Lab03-LokalizacjaLiDAR3D/Dockerfile).
 
@@ -14,11 +14,11 @@ docker load < arm_image03.tar.gz
 
 2. Run the docker container with [mp_loam_run_gpu_nvidia.sh](https://github.com/dmn-sjk/MPProject/blob/main/MP_LOAM/mp_loam_run_gpu_nvidia.sh) script if you have nvidia GPU or [mp_loam_run_cpu.sh](https://github.com/dmn-sjk/MPProject/blob/main/MP_LOAM/mp_loam_run_cpu.sh) script otherwise:
 ```bash
-./mp_loam_run_gpu_nvidia.sh
+bash mp_loam_run_gpu_nvidia.sh
 ```
 
 ```bash
-./mp_loam_run_cpu.sh
+bash mp_loam_run_cpu.sh
 ```
 
 3. You can attach to a running container in another terminal with:
@@ -74,7 +74,7 @@ In rviz you can see:
     <img src="_images/loam_gt.png" title="" width=40%>
 </p>
 
-Considering the clear implementation, you can conveniently analyze the code. Notice the order of point cloud processing with the code in the following files: `laserMapping.cpp`, `laserOdometry.cpp`, `scanRegistration.cpp`.
+Considering the clear implementation, you can conveniently analyze the code. Notice the order of point cloud processing in the following files: `laserMapping.cpp`, `laserOdometry.cpp`, `scanRegistration.cpp`.
 
 # ORB-SLAM3
 ORB-SLAM3 is the first real-time SLAM library able to perform Visual, Visual-Inertial and Multi-Map SLAM with monocular, stereo and RGB-D cameras, using pin-hole and fisheye lens models. It is based on detecting the ORB features on an image, matching the features by the descriptors and final optimization with the use of reprojection error. It is a third version of an ORB-SLAM system. A very brief changelog of versions:
@@ -86,7 +86,7 @@ ORB-SLAM3 is the first real-time SLAM library able to perform Visual, Visual-Ine
 
 We will test the stereovision version of the system on our own data ([arm_put_car.bag](https://chmura.put.poznan.pl/s/9pkDucSDiPlwgsd)) recorded from the car which circled the Piotrowo campus. The whole route was about 1.3 km long. The data sequence consists of images from two cameras(~20 Hz), DGPS data (~10 Hz) and AHRS data (~200 Hz). DGPS data provided localization information with an accuracy of about several centimeters, which is enough for our purpose to evaluate the localization accuracy of the system.
 
-# Excercises
+# TODO:
 ## Docker container setup
 ORB-SLAM3 has a couple of dependencies (Pangolin, OpenCV, Eigen3) and a few inconveniences in order to build it for ROS, so to save your time the docker image with ORB-SLAM3 and its dependencies installed was prepared. You can check the Dockerfile [here](https://github.com/MichalNowicki/LabARM/blob/main/Lab04-ORBSLAM3/Dockerfile).
 
@@ -97,11 +97,11 @@ docker load < arm_image04.tar.gz
 
 2. Run the docker container with [mp_orb3_run_gpu_nvidia.sh](https://github.com/dmn-sjk/MPProject/blob/main/MP_ORB3/mp_orb3_run_gpu_nvidia.sh) script if you have nvidia GPU or [mp_orb3_run_cpu.sh](https://github.com/dmn-sjk/MPProject/blob/main/MP_ORB3/mp_orb3_run_cpu.sh) script otherwise:
 ```bash
-./mp_orb3_run_gpu_nvidia.sh
+bash mp_orb3_run_gpu_nvidia.sh
 ```
 
 ```bash
-./mp_orb3_run_cpu.sh
+bash mp_orb3_run_cpu.sh
 ```
 
 3. You can attach to a running container in another terminal with:
@@ -198,7 +198,7 @@ mv /ORB_SLAM3/FrameTrajectory_TUM_Format.txt /ORB_SLAM3/scripts/orbslam3.txt
 ```
 
 ## Trajectory evaluation:
-To evaluate the output trajectory we will compare it with the DGPS data as a ground truth. DGPS data is already processed to the correct format (TUM trajectory format with poses in UTM coordinate system) and placed in the `/ORB_SLAM3/scripts/dgps.txt`. We will use the evaluation script from the ORB-SLAM3 repository: `avaluate_ate.py`. Run the evaluation with:
+To evaluate the output trajectory we will compare it with the DGPS data as a ground truth. DGPS data is already processed to the correct format (TUM trajectory format with poses in UTM coordinate system). You can download it from [here](https://chmura.student.put.poznan.pl/s/7axxzw5EXqaM2Oy). We will use the evaluation script from the ORB-SLAM3 repository: `avaluate_ate.py`. Run the evaluation with:
 
 ```bash
 cd /ORB_SLAM3/scripts

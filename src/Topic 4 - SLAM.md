@@ -162,13 +162,13 @@ cam1:
 
 > **_HINT:_** The explanation of the output above can be found [here](https://github.com/ethz-asl/kalibr/wiki/yaml-formats) and [here](https://github.com/ethz-asl/kalibr/wiki/supported-models). `kalibr` notation of camera intrinsics [fu fv pu pv] is equivalent to [fx fy cx cy].
 
-Some of the parameters can be taken directly from the `kalibr` calibration output. To obtain the `bf` value, `R`, and `P` matrices we have to use [stereoRectify](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga617b1685d4059c6040827800e72ad2b6) function from `OpenCV`, which calculates the transformations (`R`, `P`) necessary to get the canonical stereovision setup (re-project image planes onto a common plane). You can use the prepared script template `/ORB-SLAM3/scripts/stereoCalibration.py` and fill the values of `K` (camera matrix), `d` (distortion coefficients vector), `R` (rotation matrix) and `T` (translation vector). To get the output of `stereoRectify()` run:
+Some of the parameters can be taken directly from the `kalibr` calibration output. To obtain the `bf` value, `R`, and `P` matrices we have to use [stereoRectify](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga617b1685d4059c6040827800e72ad2b6) function from `OpenCV`, which calculates the transformations (`R`, `P`) necessary to get and use the canonical camera configuration (re-project image planes onto a common plane parallel to the line to the line between optical centers of images) for depth estimation. You can use the prepared script template `/ORB-SLAM3/scripts/stereoCalibration.py` and fill the values of `K` (camera intrinsic matrix), `d` (distortion coefficients vector), `R` (rotation matrix) and `T` (translation vector). To get the output of `stereoRectify()` run:
 
 ```bash
 python /ORB_SLAM3/scripts/stereoCalibration.py
 ```
 
-> **_HINT:_** Notice if the calibration output is in a form of the right camera coordination system in the left camera coordination system or the other way around.
+> **_HINT:_** Notice if the transformation (R, T) is meant to transform the coordination system of left camera to the coordinate system of right camera or the other way around.
 
 Camera intrinsic matrix should be helpful:
 

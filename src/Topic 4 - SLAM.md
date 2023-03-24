@@ -8,7 +8,7 @@ LOAM is a standard 3D laser localization method introduced in [LOAM: Lidar Odome
 
 # TODO:
 ## Docker container setup
-A-LOAM implementation makes use of some dependencies e.g., CERES and PCL, so for convenience, the docker image with all installed dependencies was prepared. You can check the Dockerfile [here](https://github.com/MichalNowicki/LabARM/blob/main/Lab03-LokalizacjaLiDAR3D/Dockerfile).
+A-LOAM implementation makes use of some dependencies e.g., CERES and PCL, so for convenience, the docker image with all installed dependencies was prepared ([image for A-LOAM](https://chmura.put.poznan.pl/s/YB0jqEXZbAq9EAU)). You can check the Dockerfile [here](https://github.com/MichalNowicki/LabARM/blob/main/Lab03-LokalizacjaLiDAR3D/Dockerfile).
 
 1. Load the downloaded docker image:
 ```bash
@@ -91,7 +91,7 @@ We will test the stereovision version of the system on our own data ([arm_put_ca
 
 # TODO:
 ## Docker container setup
-ORB-SLAM3 has a couple of dependencies (Pangolin, OpenCV, Eigen3) and a few inconveniences in order to build it for ROS, so to save your time the docker image with ORB-SLAM3 and its dependencies installed was prepared. You can check the Dockerfile [here](https://github.com/MichalNowicki/LabARM/blob/main/Lab04-ORBSLAM3/Dockerfile).
+ORB-SLAM3 has a couple of dependencies (Pangolin, OpenCV, Eigen3) and a few inconveniences in order to build it for ROS, so to save your time the docker image with ORB-SLAM3 and its dependencies installed was prepared ([image for ORB-SLAM3](https://chmura.put.poznan.pl/s/T98vgBxYTNZqgHO)). You can check the Dockerfile [here](https://github.com/MichalNowicki/LabARM/blob/main/Lab04-ORBSLAM3/Dockerfile).
 
 1. Load the downloaded docker image:
 ```bash

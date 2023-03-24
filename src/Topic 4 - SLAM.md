@@ -1,7 +1,7 @@
-> **_IMPORTANT:_** Before proceeding further, start to download two docker images, one for each SLAM system that will be used:  [image for A-LOAM](https://chmura.put.poznan.pl/s/YB0jqEXZbAq9EAU) and [image for ORB-SLAM3](https://chmura.put.poznan.pl/s/T98vgBxYTNZqgHO). Moreover, download the following .bag files: [arm_put_car.bag](https://chmura.put.poznan.pl/s/9pkDucSDiPlwgsd) and [kitti00_200.bag](https://chmura.put.poznan.pl/s/FRYaqg0pFVklQt5).
-
 # Introduction:
 SLAM (Simultaneous localization and mapping) is the computational problem of constructing or updating a map of an unknown environment while simultaneously keeping track of an agent's location within it.
+
+> **_IMPORTANT:_** Before proceeding further, start to download two docker images, one for each SLAM system that will be used:  [image for A-LOAM](https://chmura.put.poznan.pl/s/YB0jqEXZbAq9EAU) and [image for ORB-SLAM3](https://chmura.put.poznan.pl/s/T98vgBxYTNZqgHO). Moreover, download the following .bag files: [arm_put_car.bag](https://chmura.put.poznan.pl/s/9pkDucSDiPlwgsd) and [kitti00_200.bag](https://chmura.put.poznan.pl/s/FRYaqg0pFVklQt5).
 
 # A-LOAM
 LOAM is a standard 3D laser localization method introduced in [LOAM: Lidar Odometry and Mapping in Real-time](http://www.roboticsproceedings.org/rss10/p07.pdf). It is focused on minimizing drift in odometry estimation and it does not involve a loop closure mechanism, thus it can be considered as more of a lidar odometry approach. The original code is not available anymore since the authors made it not public anymore, creating [kaarta](https://www.kaarta.com/) company. We will instead use [A-LOAM](https://github.com/HKUST-Aerial-Robotics/A-LOAM) - Advanced implementation of LOAM. It uses Eigen and Ceres Solver to simplify and create a clean code structure, which makes it a perfect learning material for SLAM beginners. In short, LOAM takes only point clouds as input. Based on them, it estimates the odometry by scan registration with feature matching approach and maps the environment.
@@ -27,7 +27,7 @@ bash mp_loam_run_cpu.sh
 3. You can attach to a running container in another terminal with:
 ```bash
 docker exec -it MP_LOAM bash
-``` 
+```
 
 > **_IMPORTANT:_** Remember to give container access to the display for each terminal session you open with the command: ```xhost +local:root```.
 

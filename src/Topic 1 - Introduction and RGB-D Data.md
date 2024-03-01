@@ -122,7 +122,7 @@ We have to use the NEAREST method, otherwise, there are depth values, that never
 # DIY Task 1
 Download the dataset from (you should have downloaded it earlier, so it is probably already on your PC): https://chmura.put.poznan.pl/s/SnJSLZYvvxX6gaI
 
-Prepare simple classification CNN (you can choose the framework, although [PyTorch](https://pytorch.org/) is suggested) using only the depth images. Separate the dataset to train and validation subsets.
+Prepare simple classification CNN (you can choose the framework, although [PyTorch](https://pytorch.org/) is suggested) using only the depth images. Separate the dataset to `train` and `validation` subsets.
 
 Remember to augment the data (search for depth data augmentation methods).
 

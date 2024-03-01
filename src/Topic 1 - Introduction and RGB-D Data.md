@@ -111,9 +111,9 @@ As you can see, the real-world data is not so perfect. What are the black artifa
 
 ## Depth image processing in deep learning
 
-When loading an RGB (or grayscale) image for deep learning processes, you usually normalize and scale it. 
+When loading an RGB (or grayscale) image for deep learning processes, you usually standardize and scale it. 
 
-But how to normalize depth image? Because it is usually stored as int16 values, we can divide the whole image by the max value of this type (65535).
+But how to standardize depth image? Because it is usually stored as int16 values, we can divide the whole image by the max value of this type (65535). Another possibility is to find the maximum value of all images in the dataset.
 
 A greater problem occurs when we want to scale the image. Try scaling down the depth image ([for example using the PIL library and trying different resample methods](https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.resize)). Zoom to the edges of the chair. What are the values there? 
 

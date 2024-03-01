@@ -10,7 +10,7 @@ The Machine Perception project is about learning to work with more unusual data:
 + Topic 4 - SLAM (D. Sójka)
 + Topic 5 - **Projects assignment**
 
-In the 5th class, you will be assigned into pairs and will choose a project topic. Then, for all the next classes, you will come accordingly to the proposed schedule (in pairs) to talk about your project advancements.
+In the 5th class, you will be assigned into pairs and will choose a project topic. Then, for all the next classes, you will come according to the proposed schedule (in pairs) to talk about your project advancements.
 
 For the last classes, you will prepare a presentation of your project and present it in front of the whole group.
 
@@ -21,7 +21,7 @@ To pass, you have to work on a project, report your progress verbally every week
 There will be a **total of 30 points** to get:
 + 15 p. for implementation:
   + 5 p. for code review
-  + 10 p. for fullfiling the project's requirements
+  + 10 p. for fulfilling the project's requirements
 + 5 p. for systematic work
 + 10 p. for the presentation:
   + 6 p. for presenting the project
@@ -53,7 +53,7 @@ The projects will be about using deep learning with the data and tools that you'
 
 An RGB-D image is actually a pair of images, one usual RGB image, and one corresponding depth image.
 
-A [depth image][1] is an image or image channel that contains information relating to the distance of the surfaces of scene objects from a viewpoint. Usually, the further away from the camera the surface is, the brighter it is on the image. It is this way because the image stores the distance - the higher distance, the brighter image.
+A [depth image][1] is an image or image channel that contains information relating to the distance of the surfaces of scene objects from a viewpoint. Usually, the further away from the camera the surface is, the brighter it is on the image. It is this way because the image stores the distance - the higher the distance, the brighter the image.
 
 ## Example data
 
@@ -65,7 +65,7 @@ A [depth image][1] is an image or image channel that contains information relati
 ## How to load and preview depth images
 We are going to use Python to load and preview depth data. 
 
-1. Open chosen IDE and create a new project.
+1. Open the chosen IDE and create a new project.
 Clone this project from GitHub: https://github.com/isl-org/redwood-3dscan and run
     ```python
     import redwood_3dscan as rws
@@ -76,12 +76,14 @@ Clone this project from GitHub: https://github.com/isl-org/redwood-3dscan and ru
 3. Modify the script so it matches your paths and run:
    ```python
     import matplotlib.pyplot as plt
+    from PIL import Image
+    import numpy as np
 
     depth_path = "<YOUR PATH>/data/rgbd/00033/depth/0000309-000010277729.png"
     rgb_path = "<YOUR PATH>/data/rgbd/00033/rgb/0000309-000010322928.jpg"
 
-    depth = plt.imread(depth_path)
-    rgb = plt.imread(rgb_path)
+    depth = np.array(Image.open(depth_path))
+    rgb = np.array(Image.open(rgb_path))
 
     fig, axs = plt.subplots(1, 2)
 
@@ -90,7 +92,7 @@ Clone this project from GitHub: https://github.com/isl-org/redwood-3dscan and ru
     plt.show()
    ```
 
-   **TIP**: the axises can be hidden using 
+   **TIP**: the axes can be hidden using 
    ```python
     axs[0].axis('off')
     axs[1].axis('off')
@@ -118,7 +120,7 @@ A greater problem occurs when we want to scale the image. Try scaling down the d
 We have to use the NEAREST method, otherwise, there are depth values, that never were there in the first place.
 
 # DIY Task 1
-Download dataset from (you should have downloaded it earlier, so it is probably already on your PC): https://chmura.put.poznan.pl/s/SnJSLZYvvxX6gaI
+Download the dataset from (you should have downloaded it earlier, so it is probably already on your PC): https://chmura.put.poznan.pl/s/SnJSLZYvvxX6gaI
 
 Prepare simple classification CNN (you can choose the framework, although [PyTorch](https://pytorch.org/) is suggested) using only the depth images. Separate the dataset to train and validation subsets.
 

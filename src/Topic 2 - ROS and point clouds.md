@@ -361,7 +361,7 @@ Expected result:
 ## Task 2 - Detecting the cones in the point cloud with the use of PCL
 
 <p align="center">
-    <img src="https://fs-driverless.github.io/Formula-Student-Driverless-Simulator/v2.2.0/images/banner.png" alt="" title="" width=70%>
+    <img src="_images/formula.png" alt="https://fs-driverless.github.io/Formula-Student-Driverless-Simulator/v2.2.0/images/banner.png" title="" width=70%>
 </p>
 
 Your task is to detect the cones in the cloud and estimate their center points. The LiDAR data was simulated and recorded from the [Formula Student Driverless Simulator](https://fs-driverless.github.io/Formula-Student-Driverless-Simulator/v2.2.0/).

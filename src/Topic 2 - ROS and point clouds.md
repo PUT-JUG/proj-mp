@@ -45,7 +45,7 @@ cd catkin_ws
 catkin_make
 ```
 
-To build the ROS nodes (catkin packages) you have to run the same command in the same directory as above:
+The catkin packages should reside inside `src` folder. To build the ROS nodes (catkin packages) you have to run the same command in the same directory as above:
 ```bash
 catkin_make
 ```
@@ -93,23 +93,31 @@ Publish message to the topic:
 rostopic pub [TOPIC] [MSG_TYPE] [ARGS]
 ```
 
-## Rosbags
+## Bags
+A bag is a file format in ROS for storing ROS message data. ROS messages can can be recorded inside bag files and played back in ROS. They provide a convenient way for testing the developed code and creating datasets.
 
+Play back the contents of a file:
+```bash
+rosbag play [BAG_FILE_PATH].bag
+```
+
+Display a summary of the contents of the bag file:
+```bash
+rosbag info [BAG_FILE_PATH].bag
+```
 
 > **HINT:**  More informations about ROS and more ROS tutorials can be found [here](http://wiki.ros.org/ROS/Tutorials).
 
 # Point Clouds
-
-<!-- > **_IMPORTANT:_**  Before proceeding to the rest of this instrucion, start downloading this file: https://chmura.put.poznan.pl/s/SnJSLZYvvxX6gaI -->
 
 A [point cloud](https://en.wikipedia.org/wiki/Point_cloud) is a discrete set of data points in space. The points may represent a 3D shape, object or scene. Each point position has its set of Cartesian coordinates (X, Y, Z). Point clouds are generally produced by 3D scanners, LIDARs or by photogrammetry software.
 
 ## Example data
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Point_cloud_torus.gif/220px-Point_cloud_torus.gif)
-<img src="https://velodynelidar.com/wp-content/uploads/2020/07/A-Guide-to-Lidar-Wavelengths-Velodyne-Lidar-AlphaPrime-1.jpg" alt="RGB image of a cubic frame" title="RGB image of a cubic frame" width=57%>
+<img src="https://velodynelidar.com/wp-content/uploads/2020/07/A-Guide-to-Lidar-Wavelengths-Velodyne-Lidar-AlphaPrime-1.jpg" alt="RGB image of a cubic frame" title="RGB image of a cubic frame" height=221>
 
-## ROS point cloud message
+<!-- ## ROS point cloud message
 ROS message for handling point clouds is PointCloud2 message from sensor_msgs subpackage:
 ```
 # This message holds a collection of N-dimensional points, which may
@@ -139,18 +147,18 @@ uint32  row_step     # Length of a row in bytes
 uint8[] data         # Actual point data, size is (row_step*height)
 
 bool is_dense        # True if there are no invalid points
-```
+``` -->
 
 # Point Cloud Library (PCL)
 <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Pcl_%28PointClouds_library%29_logo_with_text.png" alt="RGB image of a cubic frame" title="RGB image of a cubic frame" width=14%>
 
-The [Point Cloud Library (PCL)](https://pointclouds.org/) is a standalone, open-source library for 2D/3D image and point cloud processing. The library contains algorithms for filtering, feature estimation, surface reconstruction, 3D registration, model fitting, object recognition, and segmentation. We will use PCL C++ API.
+The [Point Cloud Library (PCL)](https://pointclouds.org/) is a standalone, open-source library for 2D/3D image and point cloud processing. The library contains algorithms for filtering, feature estimation, surface reconstruction, 3D registration, model fitting, object recognition, and segmentation. We will use PCL C++ API. There is a small [python binding to the PCL library](https://github.com/strawlab/python-pcl), but is it no longer maintained and the functionalities are limited.
 
 > **HINT:**  PCL documentation can be found [here](https://pointclouds.org/documentation/).
 
 > **HINT:**  PCL tutorials can be found [here](https://pcl.readthedocs.io/projects/tutorials/en/master/). Using PCL in ROS is described [here](https://github.com/methylDragon/pcl-ros-tutorial/blob/master/PCL%20Reference%20with%20ROS.md).
 
-## PCL installation:
+<!-- ## PCL installation:
 Install PCL for ROS:
 ```bash
 sudo apt install ros-[YOUR_ROS_DISTRO]-pcl-ros
@@ -159,9 +167,9 @@ sudo apt install ros-[YOUR_ROS_DISTRO]-pcl-ros
 Install useful PCL command line tools:
 ```bash
 sudo apt install pcl-tools
-```
+``` -->
 
-## ROS package setup for PCL:
+<!-- ## ROS package setup for PCL:
 For the most general setup: 
 
 Add these lines in `CMakeLists.txt`:
@@ -180,10 +188,10 @@ Add the following lines to `package.xml`:
 <build_depend>pcl_ros</build_depend>
 <exec_depend>pcl_conversions</exec_depend>
 <exec_depend>pcl_ros</exec_depend>
-```
+``` -->
 
 ## `pcl::PointCloud<PointT>` type
-[pcl::PointCloud\<PointT>](https://pointclouds.org/documentation/singletonpcl_1_1_point_cloud.html) is the core point cloud class in the PCL library. This class has a similar structure to the PointCloud2 message type, including a header. It can be templated on any of the Point types listed in [point_types.hpp](https://pointclouds.org/documentation/point__types_8hpp_source.html), e.g.:
+[pcl::PointCloud\<PointT>](https://pointclouds.org/documentation/singletonpcl_1_1_point_cloud.html) is the core point cloud class in the PCL library. It can be templated on any of the Point types listed in [point_types.hpp](https://pointclouds.org/documentation/point__types_8hpp_source.html), e.g.:
 - **PointXYZ** - float x, y, z coordinates
 - **PointXYZI** - float x, y, z coordinates and intensity
 - **PointXYZRGB** - float x, y, z coordinates and rgb color
@@ -195,7 +203,7 @@ Clouds in PCL are usually handled using [smart pointers](https://en.cppreference
 pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud
 ```
 
-Converting between the ROS's sensor_msgs/PointCloud2 class and the point cloud template pcl::PointCloud\<PointT> class can be done with [`pcl::fromROSMsg`](http://docs.ros.org/en/indigo/api/pcl_conversions/html/namespacepcl.html#af662c7d46db4cf6f7cfdc2aaf4439760) and [`pcl::toROSMsg`](http://docs.ros.org/en/indigo/api/pcl_conversions/html/namespacepcl.html#af2c39730f92ade1603c55d45265e386d) from `pcl_conversions` package.
+<!-- Converting between the ROS's sensor_msgs/PointCloud2 class and the point cloud template pcl::PointCloud\<PointT> class can be done with [`pcl::fromROSMsg`](http://docs.ros.org/en/indigo/api/pcl_conversions/html/namespacepcl.html#af662c7d46db4cf6f7cfdc2aaf4439760) and [`pcl::toROSMsg`](http://docs.ros.org/en/indigo/api/pcl_conversions/html/namespacepcl.html#af2c39730f92ade1603c55d45265e386d) from `pcl_conversions` package. -->
 
 ## PCD (Point Cloud Data)
 [PCD (Point Cloud Data)](https://pointclouds.org/documentation/tutorials/pcd_file_format.html) is the primary data format in PCL. Point cloud can be saved in .pcd format with `pcl::io::savePCDFile` function. Point clouds saved in `.pcd` format can be displayed with the use of `pcl_viewer` command line tool from `pcl_tools` package. You can test it by downloading the example `.pcd` file and running the `pcl_viewer`:
@@ -215,7 +223,7 @@ Most of the PCL's functionalities (e.g., filters, segmentations) follow similar 
  - depending on the functionality call `.compute()`, `.align()`, `.filter()`, etc. to get the output.
 
 ### PassThrough filter example:
-(Passthrough filter filters values in or outside a specified range in one dimension)
+(Passthrough filter filters values inside or outside a specified range in one dimension)
 
 ```cpp
 pcl::PassThrough<PointT> filter;
@@ -229,13 +237,13 @@ filter.filter(output_cloud);
 
 ## Data download
 Download the .bag files from following links:
-- https://drive.google.com/file/d/1p1ispuGiPlfS1ECIAfG3PWv1O23Uc5QV/view?usp=sharing
-- https://drive.google.com/file/d/1CxnU4j6ks-cgr-98fP-EOhiCWR9qaIWh/view?usp=sharing
+- https://drive.google.com/file/d/1BzrYD6691-iUnGSD2Jg6k95rEmkvwUsA/view?usp=sharing
+- https://drive.google.com/file/d/1tP4JcVKj01HjQlGjOjdV2N5Dx35lSmZe/view?usp=sharing
 
 ## Docker container setup
 To make things easier the docker image with PCL was prepared. 
 
-1. Download the docker image from [here](https://drive.google.com/file/d/18uV7knB0r-sB3XYDHMTE_soJL3qijDr3/view?usp=sharing)
+1. Download the docker image from [here](https://drive.google.com/file/d/1kLDAAXiD1VklGuJxyVQcs0wF5eJf5ya-/view?usp=sharing)
 
 2. Load the image:
 
@@ -267,7 +275,7 @@ docker run -it \
     bash
 ```
 
-> **NOTE:**  You will be able to exchange the data between the host machine and container using shared folder: `/home/student/mp_docker:/home/share`.
+> **NOTE:**  You will be able to exchange the data between the host machine and container using the shared folder: `/home/student/mp_docker:/home/share`.
 
 4. To attach to a container in different terminal you can run:
 ```bash
@@ -297,16 +305,47 @@ source devel/setup.bash
 
 ## Task 1 - Create a range image from point cloud
 
-> **NOTE:**  Keep in mind that both PCL and OpenCV had to be installed and configured for the project.
+> **NOTE:**  Keep in mind that both PCL and OpenCV had to be installed and configured for the project beforehand.
 
-The range image is an image of which every pixel is a distance (range) between the obstaccle and the sensor. The task is to fill the pixels of an image with the range values from the LiDAR point cloud to create a range image. The sensor data is from [ouster OS1-128](https://data.ouster.io/downloads/datasheets/datasheet-rev7-v3p0-os1.pdf) LiDAR. Dimensions of the image (1024x128) refer to the parameters of the used LiDAR sensor (horizontal resolution: 1024, vertical resolution: 128).
+<p align="center">
+<img src="_images/range_image_visu.png" alt="https://www.researchgate.net/publication/221908957/figure/fig2/AS:667827468001297@1536233884674/Range-image-generation-from-laser-scanner-point-cloud.jpg" title="" width=70%>
+</p>
 
-1. Open `src/ex1.cpp` file from cloned package (I suggest using  theremote explorer extension for VS code to attach to a running container).
-2. Calculate the horizontal and vertical angle of the laser beam for each point. Points outside of the vertical field of view of the sensor ($\pm$ 22.5 $^\circ$) should be discarded.
+Range images are commonly used representations for 3D LiDAR point cloud processing in the field of autonomous driving. The 2D image view is a more compact representation and can be more convenient to use. The range image is an image on which every pixel is a distance (range) between the obstacle and the sensor. 
+
+The task is to fill the pixels of an image with the range values from the LiDAR point cloud to create a range image. The sensor data is from [ouster OS1-128](https://data.ouster.io/downloads/datasheets/datasheet-rev7-v3p0-os1.pdf) LiDAR. Dimensions of the image (1024x128) refer to parameters of the used LiDAR sensor **(horizontal resolution: 1024, vertical resolution: 128).** Vertical field of view of the sensor is $\pm$ 22.5 $^\circ$.
+
+### How to generate a range image from point cloud?
+> [Tao et al., Detailed Analysis on Generating the Range Image for LiDAR Point Cloud Processing. Electronics 2021, 10, 1224.](https://www.mdpi.com/2079-9292/10/11/1224)
+
+Given a point's 3D Cartesian coordindates (x, y, z), we need to calculate the spherical coordinates (the range r, the azimuth angle &theta; and the elevation angle &phi;):
+
+<p align="center">
+<img src="_images/spherical_visu.png" alt="https://www.mathworks.com/help/matlab/ref/math_cartsph.png" title="" width=30%>
+</p>
+
+<p align="center">
+<img src="_images/spherical.png" alt="" title="" width=30%>
+</p>
+
+Let u and v represent the column and row index of the range image. Ideally, the center column of the range image should point to the vehicle’s heading direction. Therefore, the column index u can be calculated as:
+<p align="center">
+<img src="_images/u.png" alt="" title="" width=30%>
+</p>
+where ⌊·⌋ is the floor operator, w is the width of the range image.
+
+If we define &phi;<sub>up</sub> and &phi;<sub>down</sub> as the maximum and minimum elevation angles, we have:
+<p align="center">
+<img src="_images/v.png" alt="" title="" width=30%>
+</p>
+
+Steps:
+1. Open `src/ex1.cpp` file from cloned package (I suggest using  the remote explorer extension for VS code to attach to a running container).
+2. Calculate the range, horizontal angle (azimuth angle) and vertical angle (elevation angle) of the laser beam for each point. Use [atan2](https://cplusplus.com/reference/cmath/atan2/) function for arctan calculation to handle angles greater than $\pm$π/2.
 3. Calculate the pixel location on the image for each point.
-4. Calculate the range value for each point. If the value of range is higher than 50 m, set it to 50 m.
+4. If the value of range is higher than 50 m, set it to 50 m.
 5. Normalize pixel values from 0-50 to 0-255.
-3. To check the results run the roslaunch and play back the LiDAR data recorded in `ouster.bag`. The range image is published and should be visible in rviz.
+6. To check the results run the roslaunch and play back the LiDAR data recorded in `ouster.bag`. The range image is published and should be visible in the visuzalization tool `rviz`.
 
 ```bash
 roslaunch mp_pcl ex1.launch
@@ -328,10 +367,20 @@ Expected result:
 Your task is to detect the cones in the cloud and estimate their center points. The LiDAR data was simulated and recorded from the [Formula Student Driverless Simulator](https://fs-driverless.github.io/Formula-Student-Driverless-Simulator/v2.2.0/).
 
 1. Open `src/ex2.cpp` file from the cloned package.
-2. Complete the `filter` function to downsample the point cloud with a voxel filter. Use [`pcl::VoxelGrid`](https://pointclouds.org/documentation/classpcl_1_1_voxel_grid.html) class. The leaf size can be set with the `.setLeafSize` method. Observe how different leaf size values affect the output cloud.
-3. Complete the `remove_ground` function to remove the ground from the point cloud, to be able to segment the cones in the next steps. Since it is the data from simulation with perfectly flat ground, you could just limit the value of points in the `Z` axis, but to get familiar with PCL, fit the plane to the point cloud with [RANSAC](https://en.wikipedia.org/wiki/Random_sample_consensus) algorithm using [pcl::SACSegmentation](https://pointclouds.org/documentation/classpcl_1_1_s_a_c_segmentation.html) and extract "inlier points" from the original cloud with [pcl::ExtractIndices](https://pointclouds.org/documentation/classpcl_1_1_extract_indices_3_01pcl_1_1_p_c_l_point_cloud2_01_4.html).
-4. Complete the `get_cluster_indices` function. Use euclidean clustering ([pcl::EuclideanClusterExtraction](https://pointclouds.org/documentation/classpcl_1_1_euclidean_cluster_extraction.html)) to get cones clusters.
-5. Complete `get_cones_centers_cloud` by calculating the average position of points in each cone cluster. You can calculate the average of each dimension manually or use [pcl::CentroidPoint](http://pointclouds.org/documentation/classpcl_1_1_centroid_point.html). Append the calculated average points to the `output_cones_cloud`. Keep in mind that `output_cluster_indices` is a vector of `pcl::PointIndices`. Single `pcl::PointIndices` has point indices from a single cluster (`pcl::PointIndices.indices` - another vector). 
+2. Complete the `filter` function to downsample the point cloud (reduce the number of points, to make the point cloud processing faster) with a voxel filter. 
+
+    Voxel filter creates a 3D voxel grid (think about a voxel grid as a set of tiny 3D boxes in space) over the input point cloud data. Then, in each voxel (i.e., 3D box), all the points present will be approximated (i.e., downsampled) with their centroid.
+
+    Use [`pcl::VoxelGrid`](https://pointclouds.org/documentation/classpcl_1_1_voxel_grid.html) class. The leaf size (voxel dimensions) can be set with the `.setLeafSize()` method. Observe how different leaf size values affect the output cloud.
+3. Complete the `remove_ground` function to remove the ground from the point cloud, to be able to segment the cones in the next steps. Since it is the data from simulation with perfectly flat ground, you could just limit the value of points in the `Z` axis. However, to get familiar with PCL, fit the plane to the point cloud with [RANSAC](https://en.wikipedia.org/wiki/Random_sample_consensus) algorithm using [pcl::SACSegmentation](https://pointclouds.org/documentation/classpcl_1_1_s_a_c_segmentation.html) and extract "inlier points" from the original cloud with [pcl::ExtractIndices](https://pointclouds.org/documentation/classpcl_1_1_extract_indices_3_01pcl_1_1_p_c_l_point_cloud2_01_4.html). The inlier points are the points that approximately lay on the fitted plane (the ground).
+4. Complete the `get_cluster_indices` function. Use Euclidean clustering ([pcl::EuclideanClusterExtraction](https://pointclouds.org/documentation/classpcl_1_1_euclidean_cluster_extraction.html)) to cluster points of each cone.
+
+    Euclidean clustering segments a point cloud by grouping points within a specified distance threshold into distinct clusters based on their spatial proximity.
+
+
+5. Complete `get_cones_centers_cloud` function. Get a single center point of each cone, by calculating the average position of points in each cone cluster. You can calculate the average of each dimension manually or use [pcl::CentroidPoint](http://pointclouds.org/documentation/classpcl_1_1_centroid_point.html). 
+
+<!-- Keep in mind that `output_cluster_indices` is a vector of `pcl::PointIndices`. Single `pcl::PointIndices` has point indices from a single cluster (`pcl::PointIndices.indices` - another vector).  -->
 6. To check the results run the roslaunch and playback the data from `fsds_lidar.bag`:
 
 ```bash

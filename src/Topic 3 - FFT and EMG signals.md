@@ -1,5 +1,6 @@
 <!-- for math equations - MathJax -->
 <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
+
 # Fourier transform
 
 ## Introduction
@@ -73,7 +74,7 @@ T = 1
 
 (y,t) = sin(f = 10.0, T=T, fs=fs)
 
-N=int(Fs*T)
+N=int(fs*T)
 
 yf = fft(y)
 xf = # fill
@@ -86,7 +87,7 @@ plt.show()
 In the next part, instead of manually calculating the frequency vector, you can use the fftfreq function:
 
 ```python
-xf = fftfreq(N, 1/Fs)
+xf = fftfreq(N, 1/fs)
 ```
 However, you need to know how this vector is generated and what is the value of a single frequency quantum (the spectral resolution).
 
@@ -160,13 +161,13 @@ $$
 
 ## Tasks, part 2
 1. Load the [MVC signal](https://chmura.put.poznan.pl/s/4UuSx0lfK53FA7I) and [the training signal](https://chmura.put.poznan.pl/s/38aeyGzigLEHLbp)
-2. Write rms and zc functions that for each channel (`columns_emg`) will estimate the features described above
+2. Write `rms` and `zc` functions that for each channel (`columns_emg`) will estimate the features described above
    ``` python
     feature_rms = rms(signal, window=500, stride=100, fs=5120, columns_emg=['EMG_8', 'EMG_9'])# window length and stride given in [ms]
     
     feature_zc = zc(signal, threshold=0.1, window=500, stride=100, fs=5120, columns_emg=['EMG_8', 'EMG_9'])# window length and stride given in [ms]
     ```
-3.  Analyzing column `TRAJ_GT` you should notice geasture `0`, corresponding to lack of movement (arm is in the neutral state) (more on the gestures can be found [here](https://biolab.put.poznan.pl/putemg-dataset/). For each channel estimate the `zc`, assuming, that the threshold is the value, where 95% of all the noise samples fit.
+3.  Analyzing column `TRAJ_GT` you should notice geasture `0`, corresponding to lack of movement (arm is in the neutral state) (more on the gestures can be found [here](https://biolab.put.poznan.pl/putemg-dataset/)). For each channel, determine the threshold value for the `zc` function, assuming that the threshold is the value that covers 95% of all noise samples. You can use *numpy.percentile*.
  ``` python
     threshold = find_threshold(signal, columns_emg=['EMG_8', 'EMG_9'], column_gesture='TRAJ_GT', idle_gesture_id = 0)
     

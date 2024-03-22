@@ -191,7 +191,7 @@ cam1:
 
 > **_HINT:_** The explanation of the output above can be found [here](https://github.com/ethz-asl/kalibr/wiki/yaml-formats) and [here](https://github.com/ethz-asl/kalibr/wiki/supported-models). `kalibr` notation of camera intrinsics [fu fv pu pv] is equivalent to [fx fy cx cy].
 
-Some of the parameters can be taken directly from the `kalibr` calibration output. To obtain the `bf` value, `R`, and `P` matrices, we have to use [stereoRectify](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga617b1685d4059c6040827800e72ad2b6) function from `OpenCV`, which calculates the transformations (`R`, `P`) necessary to get and use the canonical camera configuration (re-project image planes onto a common plane parallel to the line between optical centers of images) for depth estimation. You can use the prepared script template `/ORB-SLAM3/scripts/stereoCalibration.py` and fill the values of `K` (camera intrinsic matrix), `d` (distortion coefficients vector), `R` (rotation matrix) and `T` (translation vector). To get the output of `stereoRectify()` run:
+Some of the parameters can be taken directly from the `kalibr` calibration output. To obtain the `bf` value, `R`, and `P` matrices, we have to use [stereoRectify](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga617b1685d4059c6040827800e72ad2b6) function from `OpenCV`, which calculates the transformations (`R`, `P`) necessary to get and use the canonical camera configuration (re-project image planes onto a common plane parallel to the line between optical centers of images) for depth estimation. You can use the prepared script template `/ORB-SLAM3/scripts/stereoCalibration.py` and fill the values of `K` (camera intrinsic matrix), `d` (distortion coefficients vector), `R` (rotation matrix) and `T` (translation vector). You should also adjust the image size in `stereoRectify()`function call from (0, 0) to (720, 540). To get the output of `stereoRectify()` run:
 
 ```bash
 python /ORB_SLAM3/scripts/stereoCalibration.py
@@ -228,7 +228,7 @@ rosrun ORB_SLAM3 Stereo /ORB_SLAM3/Vocabulary/ORBvoc.txt Examples/Stereo/PP.yaml
 ```bash
 rosbag play -r 0.25 --pause arm_put_car.bag
 ```
-> **_HINT:_** --pause means that the data will be played after pressing the spacebar. Since the ORB-SLAM3 is quite computationally demanding, so we slow down the publish rate with the -r flag (0.25 - 4 times slower).
+> **_HINT:_** --pause means that the data will be played after pressing the spacebar. Since the ORB-SLAM3 is quite computationally demanding, we slow down the publish rate with the -r flag (0.25 - 4 times slower).
 
 4. After the replay of all data, shut down the ORB-SLAM3 node with `ctrl + c`. The output trajectory will be saved to `FrameTrajectory_TUM_Format.txt`. Move it to the `scripts` directory:
 ```bash

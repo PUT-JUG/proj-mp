@@ -19,6 +19,7 @@ For the last classes, you will prepare a presentation of your project and presen
 To pass, you have to work on a project, report your progress verbally every week and present its results in front of the whole group at the end of the semester.
 
 There will be a **total of 30 points** to get:
+
 + 15 p. for implementation:
   + 5 p. for code review
   + 10 p. for fulfilling the project's requirements
@@ -67,13 +68,15 @@ We are going to use Python to load and preview depth data.
 
 1. Open the chosen IDE and create a new project.
 Clone this project from GitHub: https://github.com/isl-org/redwood-3dscan and run
+
     ```python
     import redwood_3dscan as rws
 
     rws.download_rgbd("00033")
     ```
-2. Extract the downloaded file.
-3. Modify the script so it matches your paths and run:
+3. Extract the downloaded file.
+4. Modify the script so it matches your paths and run:
+
    ```python
     import matplotlib.pyplot as plt
     from PIL import Image
@@ -93,12 +96,14 @@ Clone this project from GitHub: https://github.com/isl-org/redwood-3dscan and ru
    ```
 
    **TIP**: the axes can be hidden using 
+
    ```python
     axs[0].axis('off')
     axs[1].axis('off')
    ```
 
    **TIP**: the depth image can be displayed in grayscale:
+
    ```python
     axs[1].imshow(depth, cmap='gray')
    ```

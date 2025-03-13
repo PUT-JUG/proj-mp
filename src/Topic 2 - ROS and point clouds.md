@@ -4,7 +4,7 @@ In this class, you will learn the fundamentals and capabilities of ROS2 (Robot O
 - Generate a 2D map of the robot’s environment using LIDAR data.
 - Enable the robot to navigate autonomously within this known map.
 - Explore how tweaking system parameters affects the performance of SLAM and AMCL algorithms.
-- Extend your skills to 3D localization by creating a 3D map using a laser scanner and the lidarslam_ros2 package.
+- Extend your skills to 3D localization by creating a 3D map using a laser scanner and the lidarslam package.
 
 # Before You Begin
 To complete the exercises, you’ll need two Docker images: `arm/lab03` (for 2D SLAM and navigation) and `arm/lab06` (for 3D SLAM). These images contain pre-configured ROS2 environments with all required tools and dependencies.
@@ -37,7 +37,7 @@ docker load < path/to/file.tar.gz
 # ROS2 Introduction / Recap
 
 <p align="center">
-<img src="_images/ros-humble-hawksbill-featured.jpg" alt="ROS2 Humble Hawksbill" title="ROS2 Humble Hawksbill" width=40%>
+<img src="_images/ros-humble-hawksbill-featured.jpg" alt="ROS2 Humble Hawksbill" title="ROS2 Humble Hawksbill" width=50%>
 </p>
 
 The Robot Operating System (ROS) is a set of development libraries and tools for building robotic applications. ROS offers open-source tools ranging from sensor and robot controllers to advanced algorithms. Dedicated for advanced research projects, ROS1 could not be utilized for industrial applications. It was limited by weaknesses related to message access security and the lack of adaptation to the requirements of real-time systems. The second generation, ROS2, was redesigned to meet these challenges. The differences between the versions are described in [article](http://design.ros2.org/articles/changes.html). The first distribution of ROS2 came out in late 2017, _Ardent Apalone_, which significantly extends the functionality of ROS1. We will use one of the latest stable versions, [Humble Hawksbill](https://docs.ros.org/en/rolling/Releases.html). 
@@ -61,7 +61,7 @@ Here’s a breakdown of essential terms:
 - **Discovery**: The automatic process where nodes find and connect to each other on the network.
 
 <p align="center">
-<img src="_images/Topic-MultiplePublisherandMultipleSubscriber.gif" alt="Multiple Publisher and Multiple Subscriber" title="Multiple Publisher and Multiple Subscriber" width=60%>
+<img src="_images/Topic-MultiplePublisherandMultipleSubscriber.gif" alt="Multiple Publisher and Multiple Subscriber" title="Multiple Publisher and Multiple Subscriber" width=80%>
 </p>
 
 ### ROS2 Environment (_Workspace_)
@@ -155,21 +155,6 @@ A ROS graph is a network of nodes that process data. It includes all nodes and t
 
  The tool that allows you to view and visualize the current state of the graph is: -->
 
-### Visualizing the ROS Graph
-
-```bash
-rqt_graph
-```
-
-This visualization helps you debug data flow between nodes.
-
-Example graph visualization:
-
-<p align="center">
-<img src="_images/rqt_graph.png" alt="ROS graph" title="ROS graph" width=50%>
-</p>
-
-
 ### Node Operations
 
 Starting nodes is done via the command:
@@ -244,23 +229,6 @@ To read the frequency with which data is published on a topic:
 ros2 topic hz topic_name
 ```
 
-### Messages
-
-A message is an element of communication between nodes. It can contain different types of information (e.g. location, orientation, camera image).
-Examples of standard message types:
-
-🐢 [geometry_msgs/msg/Twist](https://docs.ros2.org/latest/api/geometry_msgs/msg/Twist.html)
-
-🐢 [sensor_msgs/msg/Image](https://docs.ros2.org/latest/api/sensor_msgs/msg/Image.html)
-
-🐢 [std_msgs/msg/Header](https://docs.ros2.org/latest/api/std_msgs/msg/Header.html)
-
-For message information:
-
-```bash
-ros2 interface show message_type
-```
-
 ## Useful Tools
 
 - **RViz**: A 3D visualization tool to display sensor data and robot models:
@@ -269,7 +237,7 @@ rviz2
 ```
 
 <p align="center">
-<img src="_images/rviz.png" alt="RViz" title="RViz" width=50%>
+<img src="_images/rviz.png" alt="RViz" title="RViz" width=60%>
 </p>
 
 - **Gazebo**: A simulation environment to create a working environment for your robot and simulate its interaction with objects:
@@ -278,7 +246,15 @@ gazebo
 ```
 
 <p align="center">
-<img src="_images/gazebo.png" alt="Gazebo" title="Gazebo" width=50%>
+<img src="_images/gazebo.png" alt="Gazebo" title="Gazebo" width=60%>
+</p>
+
+- **rqt_graph**: A tool for visualizing the ROS graph:
+```bash
+rqt_graph
+```
+<p align="center">
+<img src="_images/rqt_graph.png" alt="ROS graph" title="ROS graph" width=60%>
 </p>
 
 ## Multi-Computer Setup
@@ -286,7 +262,7 @@ gazebo
 The standard used by ROS2 for communication is DDS. In DDS there is the concept of "domains". These allow the logical separation of connections within a network.
 
 <p align="center">
-<img src="_images/dds_conceptual_3.png" alt="DDS" title="DDS" width=30%>
+<img src="_images/dds_conceptual_3.png" alt="DDS" title="DDS" width=55%>
 </p>
 
 Nodes in the same domain can freely detect each other and send messages to each other, whereas nodes in different domains cannot. 
@@ -311,20 +287,20 @@ The above command will set the indicated domain ID in each terminal window. This
 
 ---
 
-# Part 1: Mapping and Navigation in a Simple Environment
+# Part 1: 2D Point Cloud SLAM and Navigation in a Simple Environment
 
 In this part, you’ll use a simulated Turtlebot3 to build a 2D map with SLAM and navigate it with AMCL.
 
 ## Key Concepts
-- **SLAM (Simultaneous Localization and Mapping)**: A technique where a robot builds a map of an unknown area while tracking its position. We’ll use Cartographer, a Google-developed SLAM system that creates maps from LIDAR data using graph optimization.
+- **SLAM (Simultaneous Localization and Mapping)**: A technique where a robot builds a map of an unknown area while tracking its position. Here, we will use [Cartographer](https://google-cartographer-ros.readthedocs.io/en/latest/algo_walkthrough.html), a Google-developed SLAM system that creates maps from [LIDAR](https://en.wikipedia.org/wiki/Lidar) data using graph optimization.
 
 <figure align="center">
 <img src="https://www.mathworks.com/discovery/slam/_jcr_content/mainParsys/band_1231704498_copy/mainParsys/lockedsubnav/mainParsys/columns_39110516/6046ff86-c275-45cd-87bc-214e8abacb7c/columns_463008322/7b029c5b-9826-4f96-b230-9a6ec96cb4ab/image.adapt.full.medium.png/1720000528959.png"
-alt="Advantages of cleaning robots using SLAM." width=60%>
+alt="Advantages of cleaning robots using SLAM." width=70%>
 <figcaption>Advantages of cleaning robots using SLAM. <a href="https://www.mathworks.com/discovery/slam.html"><sup>source</sup></a></figcaption>
 </figure>
 
-- **AMCL (Adaptive Monte Carlo Localization)**: A method to locate a robot on a known map using particle filters — “guesses” of the robot’s position that refine over time.
+- **AMCL (Adaptive Monte Carlo Localization)**: A method to locate a robot on a known map using particle filter. Particles are “guesses” of the robot’s position.
 
 <figure align="center">
 <img 
@@ -333,7 +309,7 @@ style="width: 400px; height: 300px; object-fit: none; object-position: 56.5% 46%
 
 - **Point Cloud**: A collection of 3D points (x, y, z) from sensors like LIDAR, representing the environment’s shape.
 <p align="center">
-  <img src="_images/point_cloud_car.png" style="display:inline-block;" width="40%">
+  <img src="_images/point_cloud_car.png" style="display:inline-block;" width="50%">
 </p>
 
 ## Environment preparation
@@ -348,7 +324,7 @@ wget <script_url>
 
 The container is named `ARM_03` by default.
 
-3. **Allow the container to display GUI applications**:
+3. **Allow the container to display GUI applications** (different terminal, on a host machine):
 ```bash
 xhost +local:root
 ```
@@ -414,7 +390,7 @@ export TURTLEBOT3_MODEL=burger
 ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
 ```
 
-2. **Launch Navigation2 Node** (new terminal):
+2. **Launch Navigation2 Node with AMCL method** (new terminal):
 ```bash
 ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True map:=/arm_ws/maps/turtlebot3_world_map.yaml
 ```
@@ -437,28 +413,28 @@ src="https://emanual.robotis.com/assets/images/platform/turtlebot3/ros2/tb3_navi
 
 <figure align="center">
 <img 
-src="https://emanual.robotis.com/assets/images/platform/turtlebot3/ros2/tb3_navigation2_rviz_02.png" width="80%">
+src="https://emanual.robotis.com/assets/images/platform/turtlebot3/ros2/tb3_navigation2_rviz_02.png" width="90%">
 <figcaption><a href="https://emanual.robotis.com/docs/en/platform/turtlebot3/nav_simulation/"><sup>source</sup></a></figcaption>
 </figure>
 
 ## Play with Parameters
 In the ```turtlebot3_navigation2``` package, in the ```param``` folder (/arm_ws/src/turtlebot3/turtlebot3_navigation2/param), there is a file ```burger.yaml```. Verify how the modification of the following parameters affects the AMCL module operation:
 
-    1. ```beam_skip_distance``` when ```do_beamskip``` is set to ```True```\
-    2. ```laser_max_range``` and ```laser_min_range```
-    3. ```max_beams```
-    4. ```max_particles```
-    5. ```resample_interval```
-    6. ```update_min_a``` and ```update_min_d```
+  1. ```beam_skip_distance``` when ```do_beamskip``` is set to ```True```
+  2. ```laser_max_range``` and ```laser_min_range```
+  3. ```max_beams```
+  4. ```max_particles```
+  5. ```resample_interval```
+  6. ```update_min_a``` and ```update_min_d```
 
-# Part 2: 3D SLAM with Point Clouds
+# Part 2: 3D Point CLoud SLAM
 
-Now, you’ll use **lidarslam** to build a 3D map from LIDAR data and analyze its performance.
+Now, you’ll use [lidarslam](https://github.com/rsasaki0109/lidarslam_ros2) to build a 3D map from LIDAR data and analyze its performance.
 
-[lidarslam](https://github.com/rsasaki0109/lidarslam_ros2): A ROS2 package for 3D SLAM, creating detailed maps and robot trajectories from point clouds.
+**lidarslam**: A ROS2 package for 3D SLAM, creating maps and trajectories from point clouds. It uses scan matching method to calculate the relative transformation between consecutive LIDAR scans to get the initial estimate of the motion ([NDT](https://en.wikipedia.org/wiki/Normal_distributions_transform) by default). Moreover, it refines the intial pose estimates and ensures long-term consistency of the map by graph-based pose optimization. It includes loop closure mechanism.
 
 <p align="center">
-<img src="_images/lidarslam.png" alt="Map created by lidarslam" title="Map created by lidarslam" width=40%>
+<img src="_images/lidarslam.png" alt="Map created by lidarslam" title="Map created by lidarslam" width=60%>
 </p>
 
 <!-- ## Differences between odometry and mapping:
@@ -500,47 +476,49 @@ RViz window should appear, where the localization and map building process will 
 
 ## HDL_400
 
-1. Play the prepared bag file in a separate terminal with the following command:
+Play back the data recorded using [Velodyne VLP-32](https://www.mapix.com/lidar-scanner-sensors/velodyne/velodyne-vlp-32c/) LIDAR sensor.
+
+1. **Play the bag file**:
 ```bash
 ros2 bag play -p -r 0.5 bags/hdl_400
 ```
 
 The replay process will start paused and with a ```rate``` of 0.5 of the normal speed.
 
-2. Add a ```PointCloud2``` data type to the visualization from the ```/velodyne_points``` topic in RViz. It contains the "current" readings from the [lidar](https://en.wikipedia.org/wiki/Lidar).
+2. **Add a ```PointCloud2``` data type** to the visualization from the ```/velodyne_points``` topic in RViz. It contains the "current" readings from the LIDAR.
 
-3. Unpause the replay process of bag file by using space key in the appropriate terminal.
+3. **Unpause the replay process** of bag file by using space key in the appropriate terminal.
 
-4. Observe the different between maps from `/map` topic (raw map) and `/modified_map` topic (optimized map). Similarly observe the difference between `/path` and `/modified_path` topics. Unfortunately, there is not ground truth localization for this data, but you can see the map optimization process based on loop closure mechanism.
+4. **Observe the difference** between maps from `/map` topic (raw map) and `/modified_map` topic (optimized map). Similarly observe the difference between `/path` and `/modified_path` topics. Unfortunately, there is no ground truth localization for this data, but you can see the map optimization process based on loop closure mechanism.
 
-   Loop closure is a technique in SLAM where the system recognizes when the robot has returned to a previously visited location. When a loop closure is detected, the system can correct accumulated drift errors by adjusting the entire trajectory and map. This results in a more accurate and consistent map, especially for long trajectories where odometry errors would otherwise accumulate.
+   **Loop closure** is a technique in SLAM where the system recognizes when the robot has returned to a previously visited location. When a loop closure is detected, the system can correct accumulated drift errors by adjusting the entire trajectory and map. This results in a more accurate and consistent map, especially for long trajectories where odometry errors would otherwise accumulate.
 
 ## KITTI 00
 
-A bag file with 200 first scans from the 00 sequence of the [KITTI](https://www.cvlibs.net/datasets/kitti/) dataset was prepared. The data also contain *ground truth* information, which can be used to assess the system performance.
+A bag file with 200 first scans from the 00 sequence of the [KITTI](https://www.cvlibs.net/datasets/kitti/) dataset was prepared. The data also contain *ground truth* localization, which can be used to assess the system performance.
 
-1. Restart lidarslam:
+1. **Restart lidarslam**:
 ```bash
 ros2 launch lidarslam lidarslam.launch.py
 ```
 
-2. Play the Bag:
+2. **Play the bag file**:
 ```shell
 ros2 bag play -p bags/kitti
 ```
 
-3. Add a ```Path``` data type to the visualization from the ```/path_gt_lidar``` topic in RViz. Additionally, change it's color to distinguish it from different paths (yellow and green).
+3. **Add a ```Path``` data type** to the visualization from the ```/path_gt_lidar``` topic in RViz. Additionally, change it's color to distinguish it from different paths (yellow and green).
 
-4. Unpause the replay process of bag file by using space key in the appropriate terminal.
+4. **Unpause the replay process of bag file** by using space key in the appropriate terminal.
 
-5. Observe the difference between the ```ground truth``` line and the path returned by SLAM.
+5. **Observe the difference** between the ```ground truth``` line and the path returned by SLAM.
 
-6. Repeat the experiment for ```-r``` equal to 0.3. What happens this time?
+6. **Repeat the experiment** for ```-r``` equal to 0.3. What happens this time?
 
 ## Play with the SLAM parameters
 Analyzing the [lidarslam](https://github.com/rsasaki0109/lidarslam_ros2) documentation and source code, and observing the system operation, please verify the impact of the following parameters from the ```/arm_ws/src/lidarslam_ros2/lidarslam/param/lidarslam.yaml``` file:
 
-1. ndt_resolution (scan_matcher i graph_based_slam)
+1. ndt_resolution
 2. trans_for_mapupdate
 3. map_publish_period
 4. scan_period
@@ -553,12 +531,12 @@ Analyzing the [lidarslam](https://github.com/rsasaki0109/lidarslam_ros2) documen
 
 # Sources and useful references
 
-🐢 [ROS2 - developer guide](https://docs.ros.org/en/humble/The-ROS2-Project/Contributing/Developer-Guide.html)
+- [ROS2 - developer guide](https://docs.ros.org/en/humble/The-ROS2-Project/Contributing/Developer-Guide.html)
 
-🐢 [ROS2 - documentation](https://docs.ros.org/en/humble/index.html)
+- [ROS2 - documentation](https://docs.ros.org/en/humble/index.html)
 
-🐢 [ROS2 - design](http://design.ros2.org/)
+- [ROS2 - design](http://design.ros2.org/)
 
-🐢 [ROS2 - installation](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html) - Desktop Install
+- [ROS2 - installation](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html) - Desktop Install
 
-🐢 [Turtlebot3 Simulation docs](https://emanual.robotis.com/docs/en/platform/turtlebot3/slam_simulation/)
+- [Turtlebot3 Simulation docs](https://emanual.robotis.com/docs/en/platform/turtlebot3/slam_simulation/)

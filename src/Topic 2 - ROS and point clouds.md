@@ -1,401 +1,564 @@
-# ROS introduction/recap
+# Goals of the Class
+In this class, you will learn the fundamentals and capabilities of ROS2 (Robot Operating System 2) by performing 2D SLAM (Simultaneous Localization and Mapping) and AMCL (Adaptive Monte Carlo Localization) using a simulated Turtlebot3 robot. Moreover, you will map the real 3D environment using data recorded from 3D LIDAR sensor. You will:
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Ros_logo.svg/300px-Ros_logo.svg.png" alt="RGB image of a cubic frame" title="RGB image of a cubic frame" width=25%>
+- Generate a 2D map of the robot’s environment using LIDAR data.
+- Enable the robot to navigate autonomously within this known map.
+- Explore how tweaking system parameters affects the performance of SLAM and AMCL algorithms.
+- Extend your skills to 3D localization by creating a 3D map using a laser scanner and the lidarslam_ros2 package.
 
-[Robot Operating System (ROS)](https://en.wikipedia.org/wiki/Robot_Operating_System) is an open-source robotics middleware suite. Although ROS is not an operating system (OS) but a set of software frameworks for robot software development, it provides services designed for a heterogeneous computer cluster such as hardware abstraction, low-level device control, implementation of commonly used functionality, message-passing between processes, and package management.
+# Before You Begin
+To complete the exercises, you’ll need two Docker images: `arm/lab03` (for 2D SLAM and navigation) and `arm/lab06` (for 3D SLAM). These images contain pre-configured ROS2 environments with all required tools and dependencies.
 
-> **_IMPORTANT:_**  There are two versions of ROS (ROS1 and ROS2) and many distributions. We will be working with ROS1 Noetic. ROS2 has some major differences about which you can read [here](https://roboticsbackend.com/ros1-vs-ros2-practical-overview/).
+## Check and Download Docker Images
+Verify if the images are already on your computer:
 
-## ROS Computation Graph diagram
+```bash
+docker images
+```
+Look for `arm/lab03` and `arm/lab06` in the output.
+
+If they’re missing, download them:
+
+For `arm/lab03`:
+```bash
+wget --content-disposition --no-check-certificate https://chmura.put.poznan.pl/s/pszNFePmGXxu1XX/download
+```
+For `arm/lab06`:
+```bash
+wget --content-disposition --no-check-certificate https://chmura.put.poznan.pl/s/B1td9ifRL1S0js9/download
+```
+
+Load the downloaded .tar.gz files into Docker:
+
+```bash
+docker load < path/to/file.tar.gz
+```
+
+# ROS2 Introduction / Recap
 
 <p align="center">
-<img src="https://res.cloudinary.com/dbzzslryr/image/upload/v1596181676/ros_master_communication_znqheg.png" alt="" title="" width=74%>
+<img src="_images/ros-humble-hawksbill-featured.jpg" alt="ROS2 Humble Hawksbill" title="ROS2 Humble Hawksbill" width=40%>
 </p>
 
-- **Nodes**: Nodes are processes that perform computation.
+The Robot Operating System (ROS) is a set of development libraries and tools for building robotic applications. ROS offers open-source tools ranging from sensor and robot controllers to advanced algorithms. Dedicated for advanced research projects, ROS1 could not be utilized for industrial applications. It was limited by weaknesses related to message access security and the lack of adaptation to the requirements of real-time systems. The second generation, ROS2, was redesigned to meet these challenges. The differences between the versions are described in [article](http://design.ros2.org/articles/changes.html). The first distribution of ROS2 came out in late 2017, _Ardent Apalone_, which significantly extends the functionality of ROS1. We will use one of the latest stable versions, [Humble Hawksbill](https://docs.ros.org/en/rolling/Releases.html). 
 
-- **Master**: The ROS Master provides name registration and lookup to the rest of the Computation Graph. Without the Master, nodes would not be able to find each other, exchange messages, or invoke services.
+## Key ROS2 [Concepts](https://docs.ros.org/en/humble/Concepts.html#graph-concepts)
 
-- **Parameter Server**: The Parameter Server allows data to be stored by key in a central location.
+<!-- 🐢 processing based on independent modules ([graph concept](https://docs.ros.org/en/humble/Concepts.html#graph-concepts) - nodes. _nodes_),
 
-- **Messages**: Nodes communicate with each other by passing messages. A message is simply a data structure, comprising typed fields.
+🐢 communication through publishing and subscribing (concept of _publisher/subscriber_),
 
-- **Topics**: Messages are routed via a transport system with publish / subscribe semantics. A node sends out a message by publishing it to a given topic. The topic is a name that is used to identify the content of the message. A node that is interested in a certain kind of data will subscribe to the appropriate topic.
+🐢 communication with feedback through services or actions (_services_, _actions_),
 
-- **Services**: The publish / subscribe model is a very flexible communication paradigm, but its many-to-many, one-way transport is not appropriate for request / reply interactions, which are often required in a distributed system. Request / reply is done via services, which are defined by a pair of message structures: one for the request and one for the reply.
+🐢 language-neutrality (any programming language can be integrated, _ROS client library_, _actions_). [_ROS client library_](https://docs.ros.org/en/humble/Concepts.html#client-libraries). -->
 
-- **Bags**: Bags are a format (.bag) for saving and playing back ROS message data.
+Here’s a breakdown of essential terms:
 
-> **HINT:**  You can read more about ROS concepts [here](http://wiki.ros.org/ROS/Concepts).
-
-> **HINT:**  Installation instructions for ROS1 can be found [here](http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment). You can also use official ROS [docker images](https://hub.docker.com/_/ros).
-
-## Catkin workspace and packages:
-While working with ROS, you will be working inside a catkin workspace. Catkin workspace is a folder where you modify, build, and install catkin packages. Workspace lets you build multiple catkin packages together all at once. ROS nodes are written inside the catkin packages.
-
-Before creating a catkin workspace make sure to source the ROS environment setup file to have access to ROS commands:
-```bash
-source /opt/ros/[YOUR_ROS_DISTRO]/setup.bash
-```
-
-To create a catkin workspace you have to create a directory with `src` folder and run `catkin_make`:
-```bash
-mkdir -p catkin_ws/src
-cd catkin_ws
-catkin_make
-```
-
-The catkin packages should reside inside `src` folder. To build the ROS nodes (catkin packages) you have to run the same command in the same directory as above:
-```bash
-catkin_make
-```
-
-After building you have to source the environment variables. **Remember that you have to do that in every terminal in which you want to use the built code. Note that you should do that after every building operation to use newly built code.**
-```bash
-source devel/setup.bash
-```
-
-## Running nodes:
-
-Before the execution of any node, you have to start a ROS system:
-```bash
-roscore
-```
-
-Running a single node:
-```bash
-rosrun [PACKAGE] [NODE_NAME]
-```
-
-Running a .launch file (with the use of .launch file you can, e.g. run multiple nodes with one command):
-```bash
-roslaunch [PACKAGE] [FILENAME].launch
-```
-
-## Working with topics:
-Display the list of available topics:
-```bash
-rostopic list
-```
-
-Display the information about a specific topic: 
-```bash
-rostopic info [TOPIC]
-```
-
-Read messages published to the topic: 
-```bash
-rostopic echo [TOPIC]
-```
-
-Publish message to the topic: 
-```bash
-rostopic pub [TOPIC] [MSG_TYPE] [ARGS]
-```
-
-## Bags
-A bag is a file format in ROS for storing ROS message data. ROS messages can can be recorded inside bag files and played back in ROS. They provide a convenient way for testing the developed code and creating datasets.
-
-Play back the contents of a file:
-```bash
-rosbag play [BAG_FILE_PATH].bag
-```
-
-Display a summary of the contents of the bag file:
-```bash
-rosbag info [BAG_FILE_PATH].bag
-```
-
-> **HINT:**  More informations about ROS and more ROS tutorials can be found [here](http://wiki.ros.org/ROS/Tutorials).
-
-# Point Clouds
-
-A [point cloud](https://en.wikipedia.org/wiki/Point_cloud) is a discrete set of data points in space. The points may represent a 3D shape, object or scene. Each point position has its set of Cartesian coordinates (X, Y, Z). Point clouds are generally produced by 3D scanners, LIDARs or by photogrammetry software.
-
-## Example data
-
-![](https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Point_cloud_torus.gif/220px-Point_cloud_torus.gif)
-<img src="https://velodynelidar.com/wp-content/uploads/2020/07/A-Guide-to-Lidar-Wavelengths-Velodyne-Lidar-AlphaPrime-1.jpg" alt="RGB image of a cubic frame" title="RGB image of a cubic frame" height=221>
-
-<!-- ## ROS point cloud message
-ROS message for handling point clouds is PointCloud2 message from sensor_msgs subpackage:
-```
-# This message holds a collection of N-dimensional points, which may
-# contain additional information such as normals, intensity, etc. The
-# point data is stored as a binary blob, its layout described by the
-# contents of the "fields" array.
-
-# The point cloud data may be organized 2d (image-like) or 1d
-# (unordered). Point clouds organized as 2d images may be produced by
-# camera depth sensors such as stereo or time-of-flight.
-
-# Time of sensor data acquisition, and the coordinate frame ID (for 3d
-# points).
-Header header
-
-# 2D structure of the point cloud. If the cloud is unordered, height is
-# 1 and width is the length of the point cloud.
-uint32 height
-uint32 width
-
-# Describes the channels and their layout in the binary data blob.
-PointField[] fields
-
-bool    is_bigendian # Is this data bigendian?
-uint32  point_step   # Length of a point in bytes
-uint32  row_step     # Length of a row in bytes
-uint8[] data         # Actual point data, size is (row_step*height)
-
-bool is_dense        # True if there are no invalid points
-``` -->
-
-# Point Cloud Library (PCL)
-<img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Pcl_%28PointClouds_library%29_logo_with_text.png" alt="RGB image of a cubic frame" title="RGB image of a cubic frame" width=14%>
-
-The [Point Cloud Library (PCL)](https://pointclouds.org/) is a standalone, open-source library for 2D/3D image and point cloud processing. The library contains algorithms for filtering, feature estimation, surface reconstruction, 3D registration, model fitting, object recognition, and segmentation. We will use PCL C++ API. There is a small [python binding to the PCL library](https://github.com/strawlab/python-pcl), but is it no longer maintained and the functionalities are limited.
-
-> **HINT:**  PCL documentation can be found [here](https://pointclouds.org/documentation/).
-
-> **HINT:**  PCL tutorials can be found [here](https://pcl.readthedocs.io/projects/tutorials/en/master/). Using PCL in ROS is described [here](https://github.com/methylDragon/pcl-ros-tutorial/blob/master/PCL%20Reference%20with%20ROS.md).
-
-<!-- ## PCL installation:
-Install PCL for ROS:
-```bash
-sudo apt install ros-[YOUR_ROS_DISTRO]-pcl-ros
-```
-
-Install useful PCL command line tools:
-```bash
-sudo apt install pcl-tools
-``` -->
-
-<!-- ## ROS package setup for PCL:
-For the most general setup: 
-
-Add these lines in `CMakeLists.txt`:
-
-```cmake
-find_package(PCL REQUIRED)
-include_directories(${PCL_INCLUDE_DIRS})
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
-target_link_libraries(YOUR_NODE_NAME ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-```
-
-Add the following lines to `package.xml`:
-```xml
-<build_depend>pcl_conversions</build_depend>
-<build_depend>pcl_ros</build_depend>
-<exec_depend>pcl_conversions</exec_depend>
-<exec_depend>pcl_ros</exec_depend>
-``` -->
-
-## `pcl::PointCloud<PointT>` type
-[pcl::PointCloud\<PointT>](https://pointclouds.org/documentation/singletonpcl_1_1_point_cloud.html) is the core point cloud class in the PCL library. It can be templated on any of the Point types listed in [point_types.hpp](https://pointclouds.org/documentation/point__types_8hpp_source.html), e.g.:
-- **PointXYZ** - float x, y, z coordinates
-- **PointXYZI** - float x, y, z coordinates and intensity
-- **PointXYZRGB** - float x, y, z coordinates and rgb color
-
-The points in the pcl::PointCloud<PointT> are stored in a `points` field as a vector.
-
-Clouds in PCL are usually handled using [smart pointers](https://en.cppreference.com/book/intro/smart_pointers), e.g.:
-```cpp
-pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud
-```
-
-<!-- Converting between the ROS's sensor_msgs/PointCloud2 class and the point cloud template pcl::PointCloud\<PointT> class can be done with [`pcl::fromROSMsg`](http://docs.ros.org/en/indigo/api/pcl_conversions/html/namespacepcl.html#af662c7d46db4cf6f7cfdc2aaf4439760) and [`pcl::toROSMsg`](http://docs.ros.org/en/indigo/api/pcl_conversions/html/namespacepcl.html#af2c39730f92ade1603c55d45265e386d) from `pcl_conversions` package. -->
-
-## PCD (Point Cloud Data)
-[PCD (Point Cloud Data)](https://pointclouds.org/documentation/tutorials/pcd_file_format.html) is the primary data format in PCL. Point cloud can be saved in .pcd format with `pcl::io::savePCDFile` function. Point clouds saved in `.pcd` format can be displayed with the use of `pcl_viewer` command line tool from `pcl_tools` package. You can test it by downloading the example `.pcd` file and running the `pcl_viewer`:
-```bash
-wget https://raw.githubusercontent.com/PointCloudLibrary/pcl/master/test/bunny.pcd
-pcl_viewer bunny.pcd
-```
-
-Point cloud in `.pcd` format can be loaded in code with `pcl::io::loadPCDFile` function.
-
-The other common data formats for point clouds are: [.ply](https://en.wikipedia.org/wiki/PLY_(file_format)), [.las](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities), [.obj](https://en.wikipedia.org/wiki/Wavefront_.obj_file), [.stl](https://en.wikipedia.org/wiki/STL_(file_format)), [.off](https://en.wikipedia.org/wiki/OFF_(file_format)).
-
-## Usage interface
-Most of the PCL's functionalities (e.g., filters, segmentations) follow similar usage interface:
- - use `.setInputCloud()` to set the input cloud
- - set functionality-specific parameters with `.set...()`
- - depending on the functionality call `.compute()`, `.align()`, `.filter()`, etc. to get the output.
-
-### PassThrough filter example:
-(Passthrough filter filters values inside or outside a specified range in one dimension)
-
-```cpp
-pcl::PassThrough<PointT> filter;
-filter.setInputCloud(input_cloud);
-filter.setFilterFieldName("x");
-filter.setFilterLimits(0.0, 5.0);
-filter.filter(output_cloud);
-```
-
-# Exercises
-
-## Data download
-Download the .bag files from following links:
-- https://drive.google.com/file/d/1BzrYD6691-iUnGSD2Jg6k95rEmkvwUsA/view?usp=sharing
-- https://drive.google.com/file/d/1tP4JcVKj01HjQlGjOjdV2N5Dx35lSmZe/view?usp=sharing
-
-## Docker container setup
-To make things easier the docker image with PCL was prepared. 
-
-1. Download the docker image from [here](https://drive.google.com/file/d/1kLDAAXiD1VklGuJxyVQcs0wF5eJf5ya-/view?usp=sharing)
-
-2. Load the image:
-
-```bash
-docker load < ros_noetic_pcl.tar
-```
-
-2. Add access to desktop environment for docker container
-```bash
-xhost +local:'docker inspect --format='.Config.Hostname' MP_PCL'
-```
-
-3. Run new docker container
-```bash
-docker run -it \
-    --net=host \
-    --env=DISPLAY=$DISPLAY \
-    --env=NVIDIA_VISIBLE_DEVICES=all \
-    --env=NVIDIA_DRIVER_CAPABILITIES=all \
-    --volume=/tmp/.X11-unix:/tmp/.X11-unix:ro \
-    --volume=/home/student/mp_docker:/home/share:rw \
-    --env="QT_X11_NO_MITSHM=1" \
-    --env="XAUTHORITY=$XAUTH" \
-    --volume="$XAUTH:$XAUTH" \
-    --privileged \
-    --workdir=/home \
-    --name=MP_PCL \
-    ros_noetic_pcl:latest \
-    bash
-```
-
-> **NOTE:**  You will be able to exchange the data between the host machine and container using the shared folder: `/home/student/mp_docker:/home/share`.
-
-4. To attach to a container in different terminal you can run:
-```bash
-docker exec -it MP_PCL bash
-```
-
-## ROS package setup
-1. Create a catkin workspace.
-```bash
-mkdir -p catkin_ws/src
-cd catkin_ws
-catkin_make
-``` 
-
-2. Clone the prepared ROS package to the workspace
-```bash
-cd src
-git clone https://github.com/dmn-sjk/mp_pcl.git
-```
-
-3. Build the package and source the environment
-```bash
-cd ..
-catkin_make
-source devel/setup.bash
-```
-
-## Task 1 - Create a range image from point cloud
-
-> **NOTE:**  Keep in mind that both PCL and OpenCV had to be installed and configured for the project beforehand.
+- **Nodes**: Small, independent programs that perform specific tasks (e.g., reading a sensor or moving a motor). Nodes communicate within a **ROS graph**, a network showing how they exchange data.
+- **Topics**: Channels where nodes send and receive data using a publish/subscribe model. For example, a node might publish a robot’s position to the `/robot/position` topic, while another subscribes to display it.
+- **Messages**: Structured data sent over topics, defined in `.msg` files (e.g., `geometry_msgs/msg/Twist` for velocity commands).
+- **Services and Actions**: Ways for nodes to request data or trigger tasks with feedback, unlike the one-way communication of topics.
+- **Discovery**: The automatic process where nodes find and connect to each other on the network.
 
 <p align="center">
-<img src="_images/range_image_visu.png" alt="https://www.researchgate.net/publication/221908957/figure/fig2/AS:667827468001297@1536233884674/Range-image-generation-from-laser-scanner-point-cloud.jpg" title="" width=70%>
+<img src="_images/Topic-MultiplePublisherandMultipleSubscriber.gif" alt="Multiple Publisher and Multiple Subscriber" title="Multiple Publisher and Multiple Subscriber" width=60%>
 </p>
 
-Range images are commonly used representations for 3D LiDAR point cloud processing in the field of autonomous driving. The 2D image view is a more compact representation and can be more convenient to use. The range image is an image on which every pixel is a distance (range) between the obstacle and the sensor. 
+### ROS2 Environment (_Workspace_)
 
-The task is to fill the pixels of an image with the range values from the LiDAR point cloud to create a range image. The sensor data is from [ouster OS1-128](https://data.ouster.io/downloads/datasheets/datasheet-rev7-v3p0-os1.pdf) LiDAR. Dimensions of the image (1024x128) refer to parameters of the used LiDAR sensor **(horizontal resolution: 1024, vertical resolution: 128).** Vertical field of view of the sensor is $\pm$ 22.5 $^\circ$.
+A ROS environment is the place where packages are stored, e.g. for a particular robot. There can be many different environments on one computer (e.g. _ros2_robotA_ws_, _ros2_robotB_ws_). A typical workspace looks like this:
 
-### How to generate a range image from point cloud?
-> [Tao et al., Detailed Analysis on Generating the Range Image for LiDAR Point Cloud Processing. Electronics 2021, 10, 1224.](https://www.mdpi.com/2079-9292/10/11/1224)
-
-Given a point's 3D Cartesian coordindates (x, y, z), we need to calculate the spherical coordinates (the range r, the azimuth angle &theta; and the elevation angle &phi;):
-
-<p align="center">
-<img src="_images/spherical_visu.png" alt="https://www.mathworks.com/help/matlab/ref/math_cartsph.png" title="" width=30%>
-</p>
-
-<p align="center">
-<img src="_images/spherical.png" alt="" title="" width=30%>
-</p>
-
-Let u and v represent the column and row index of the range image. Ideally, the center column of the range image should point to the vehicle’s heading direction. Therefore, the column index u can be calculated as:
-<p align="center">
-<img src="_images/u.png" alt="" title="" width=30%>
-</p>
-where ⌊·⌋ is the floor operator, w is the width of the range image.
-
-If we define &phi;<sub>up</sub> and &phi;<sub>down</sub> as the maximum and minimum elevation angles, we have:
-<p align="center">
-<img src="_images/v.png" alt="" title="" width=30%>
-</p>
-
-Steps:
-1. Open `src/ex1.cpp` file from cloned package (I suggest using  the remote explorer extension for VS code to attach to a running container).
-2. Calculate the range, horizontal angle (azimuth angle) and vertical angle (elevation angle) of the laser beam for each point. Use [atan2](https://cplusplus.com/reference/cmath/atan2/) function for arctan calculation to handle angles greater than $\pm$π/2.
-3. Calculate the pixel location on the image for each point.
-4. If the value of range is higher than 50 m, set it to 50 m.
-5. Normalize pixel values from 0-50 to 0-255.
-6. To check the results run the roslaunch and play back the LiDAR data recorded in `ouster.bag`. The range image is published and should be visible in the visuzalization tool `rviz`.
-
-```bash
-roslaunch mp_pcl ex1.launch
-``` 
-```bash
-rosbag play --loop ouster.bag
-``` 
-> **NOTE:**  `--loop` flag makes the rosbag play in a loop.
-
-Expected result:
-<img src="_images/mp_pcl1.png" alt="" title="" width=100%>
-
-## Task 2 - Detecting the cones in the point cloud with the use of PCL
-
-<p align="center">
-    <img src="_images/formula.png" alt="https://fs-driverless.github.io/Formula-Student-Driverless-Simulator/v2.2.0/images/banner.png" title="" width=70%>
-</p>
-
-Your task is to detect the cones in the cloud and estimate their center points. The LiDAR data was simulated and recorded from the [Formula Student Driverless Simulator](https://fs-driverless.github.io/Formula-Student-Driverless-Simulator/v2.2.0/).
-
-1. Open `src/ex2.cpp` file from the cloned package.
-2. Complete the `filter` function to downsample the point cloud (reduce the number of points, to make the point cloud processing faster) with a voxel filter. 
-
-    Voxel filter creates a 3D voxel grid (think about a voxel grid as a set of tiny 3D boxes in space) over the input point cloud data. Then, in each voxel (i.e., 3D box), all the points present will be approximated (i.e., downsampled) with their centroid.
-
-    Use [`pcl::VoxelGrid`](https://pointclouds.org/documentation/classpcl_1_1_voxel_grid.html) class. The leaf size (voxel dimensions) can be set with the `.setLeafSize()` method. Observe how different leaf size values affect the output cloud.
-3. Complete the `remove_ground` function to remove the ground from the point cloud, to be able to segment the cones in the next steps. Since it is the data from simulation with perfectly flat ground, you could just limit the value of points in the `Z` axis. However, to get familiar with PCL, fit the plane to the point cloud with [RANSAC](https://en.wikipedia.org/wiki/Random_sample_consensus) algorithm using [pcl::SACSegmentation](https://pointclouds.org/documentation/classpcl_1_1_s_a_c_segmentation.html) and extract "inlier points" from the original cloud with [pcl::ExtractIndices](https://pointclouds.org/documentation/classpcl_1_1_extract_indices_3_01pcl_1_1_p_c_l_point_cloud2_01_4.html). The inlier points are the points that approximately lay on the fitted plane (the ground).
-4. Complete the `get_cluster_indices` function. Use Euclidean clustering ([pcl::EuclideanClusterExtraction](https://pointclouds.org/documentation/classpcl_1_1_euclidean_cluster_extraction.html)) to cluster points of each cone.
-
-    Euclidean clustering segments a point cloud by grouping points within a specified distance threshold into distinct clusters based on their spatial proximity.
-
-
-5. Complete `get_cones_centers_cloud` function. Get a single center point of each cone, by calculating the average position of points in each cone cluster. You can calculate the average of each dimension manually or use [pcl::CentroidPoint](http://pointclouds.org/documentation/classpcl_1_1_centroid_point.html). 
-
-<!-- Keep in mind that `output_cluster_indices` is a vector of `pcl::PointIndices`. Single `pcl::PointIndices` has point indices from a single cluster (`pcl::PointIndices.indices` - another vector).  -->
-6. To check the results run the roslaunch and playback the data from `fsds_lidar.bag`:
-
-```bash
-roslaunch mp_pcl ex2.launch
-``` 
-
-```bash
-rosbag play --loop fsds_lidar.bag
+```text
+ros2_ws
+├── build/    # Temporary files for building packages
+├── install/  # Compiled packages ready to use
+├── log/      # Build process logs
+└── src/      # Your source code and packages
 ```
 
-The final result should look like this (white points - unprocessed cloud, blue points - downsampled cloud without ground points, red points - centers of cones):
+#### Building the Workspace
+Use the [`colcon`](https://colcon.readthedocs.io/en/released/) tool to build the workspace:
+
+```bash
+cd ros2_ws
+colcon build
+```
+
+To build a specific package:
+
+```bash
+colcon build --packages-select package_name
+```
+
+#### Activating the Workspace
+After building, “source” the environment to access your packages in the terminal:
+
+```bash
+source install/setup.bash
+```
+
+> **Note**: Run this command in every new terminal session to work with your workspace.
+
+### Packages
+A package is a modular unit containing nodes, libraries, and configuration files. For example, a Python package might look like:
+```text
+my_package/
+├── my_package/     # Nodes and scripts
+├── setup.py        # Installation instructions
+├── setup.cfg       # Executable details
+├── package.xml     # Package info and dependencies
+└── test/           # Automated tests
+```
+
+The organization of packages is done by using [`ament`](http://design.ros2.org/articles/ament.html), an evolution of [`catkin`](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwi3t9bii7b7AhWSw4sKHXGFCvoQFnoECBQQAQ&url=http%3A%2F%2Fwiki.ros.org%2Fcatkin&usg=AOvVaw0vs2wEMzUY0BPSzVhnvG6P) known from ROS1. With this tool, packages are structured.
+
+Create a package with:
+- C++:
+```bash
+ros2 pkg create --build-type ament_cmake package_name
+```
+
+- Python:
+```bash
+ros2 pkg create --build-type ament_python package_name
+```
+
+Add dependencies using `--dependencies`, e.g., `--dependencies rclpy sensor_msgs`.
+
+#### Package Dependencies Management
+
+A tool that significantly improves the work of the ROS developer is [`rosdep`](https://docs.ros.org/en/foxy/Tutorials/Intermediate/Rosdep.html). It allows the automatic installation of dependencies (packages, libraries) of all packages in a given environment. Thanks to the fact that the dependencies are defined in the `package.xml` file, there is no need to install them manually.
+
+To use `rosdep` call the following commands inside the root directory of the ROS2 environment (e.g. `~/ros2_ws`):
+
+```bash
+sudo rosdep init
+rosdep update
+rosdep install --from-paths src -y --ignore-src --rosdistro humble
+```
+
+These commands initialise `rosdep` and then update the local indexes from the `rosdistro` package database. The last command installs the dependencies. The `--from-paths src` argument tells you to look for `package.xml` files inside the `src` directory, `-y` causes console messages to be automatically accepted, and `--ignore-src` omits packages located in the `src` directory from the installation (since they will be built by us).
+
+Many ready-made packages are located in the ROS repository - [`rosdistro`](https://github.com/ros/rosdistro), each user has the possibility to add his package to it via _pull request_.
+
+<!-- ### Graph concept ([`ROS2 graph`](https://docs.ros.org/en/foxy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Nodes/Understanding-ROS2-Nodes.html#id2))
+
+A ROS graph is a network of nodes that process data. It includes all nodes and the communication links between them. A ROS graph contains:
+
+🐢 nodes - processes that exchange messages
+
+🐢 topics - communication channel between nodes
+
+🐢 messages - types of data exchanged
+
+🐢 discovery - the automatic process of establishing a connection between nodes
+
+ The tool that allows you to view and visualize the current state of the graph is: -->
+
+### Visualizing the ROS Graph
+
+```bash
+rqt_graph
+```
+
+This visualization helps you debug data flow between nodes.
+
+Example graph visualization:
 
 <p align="center">
-<img src="_images/mp_pcl2.png" alt="" title="" width=50%>
+<img src="_images/rqt_graph.png" alt="ROS graph" title="ROS graph" width=50%>
 </p>
 
-<!-- [1]: <https://en.wikipedia.org/wiki/Point_cloud> "Point cloud on wikipedia"
-[2]: <https://velodynelidar.com/wp-content/uploads/2020/07/A-Guide-to-Lidar-Wavelengths-Velodyne-Lidar-AlphaPrime-1.jpg> "Point cloud image from velodyne" -->
+
+### Node Operations
+
+Starting nodes is done via the command:
+
+```bash
+ros2 run package_name node_name
+```
+
+To get the current list of nodes:
+
+```bash
+ros2 node list
+```
+
+To obtain node information:
+
+```bash
+ros2 node info <node_name>
+```
+
+It is possible to group nodes allowing them to be run collectively. The `launch` files are used for this. Invoking an existing `launch` file is done by the command:
+
+```bash
+ros2 launch package_name launch_name
+```
+
+In ROS2, `launch` files can take one of three extensions, `.xml`, `.py` or `.yaml`. The `.py` extension is recommended due to the flexibility of this language. For more information, see the file reference [`launch`](https://docs.ros.org/en/humble/How-To-Guides/Launch-file-different-formats.html).
+
+### Topic Operations
+
+Viewing the current list of topics is done using the command:
+
+```bash
+ros2 topic list
+```
+
+List of topics with their associated message types:
+
+```bash
+ros2 topic list -t
+```
+
+Reading messages from the topic:
+
+```bash
+ros2 topic echo topic_name
+```
+
+A single topic can have multiple publishers as well as subscribers. Information about them, as well as the type of message being exchanged, can be checked with the command:
+
+```bash
+ros2 topic info topic_name
+```
+
+It is also possible to publish messages on a topic from the terminal:
+
+```bash
+ros2 topic pub topic_name message_type 'message_data'
+```
+
+Example:
+
+```bash
+ros2 topic pub --once /turtle1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 2.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 1.8}}"
+```
+
+To publish a message once, you can use the `--once` argument.
+
+To read the frequency with which data is published on a topic:
+
+```bash
+ros2 topic hz topic_name
+```
+
+### Messages
+
+A message is an element of communication between nodes. It can contain different types of information (e.g. location, orientation, camera image).
+Examples of standard message types:
+
+🐢 [geometry_msgs/msg/Twist](https://docs.ros2.org/latest/api/geometry_msgs/msg/Twist.html)
+
+🐢 [sensor_msgs/msg/Image](https://docs.ros2.org/latest/api/sensor_msgs/msg/Image.html)
+
+🐢 [std_msgs/msg/Header](https://docs.ros2.org/latest/api/std_msgs/msg/Header.html)
+
+For message information:
+
+```bash
+ros2 interface show message_type
+```
+
+## Useful Tools
+
+- **RViz**: A 3D visualization tool to display sensor data and robot models:
+```bash
+rviz2
+```
+
+<p align="center">
+<img src="_images/rviz.png" alt="RViz" title="RViz" width=50%>
+</p>
+
+- **Gazebo**: A simulation environment to create a working environment for your robot and simulate its interaction with objects:
+```bash
+gazebo
+```
+
+<p align="center">
+<img src="_images/gazebo.png" alt="Gazebo" title="Gazebo" width=50%>
+</p>
+
+## Multi-Computer Setup
+
+The standard used by ROS2 for communication is DDS. In DDS there is the concept of "domains". These allow the logical separation of connections within a network.
+
+<p align="center">
+<img src="_images/dds_conceptual_3.png" alt="DDS" title="DDS" width=30%>
+</p>
+
+Nodes in the same domain can freely detect each other and send messages to each other, whereas nodes in different domains cannot. 
+All ROS2 nodes use domain ID 0 by default. To avoid interference between different groups of ROS2 computers on the same network, a different domain ID should be set for each group (by setting ROS_DOMAIN_ID environment variable).
+
+Within the laboratory, it is necessary to set a separate unique domain ID for each computer. 
+To do this, read the number from the sticker stuck to the monitor and substitute it in the following command in place of `NR_COMPUTER`. If there is no sticker on your computer, select a number between 0-101 or 215-232.
+
+```bash
+grep -q ^'export ROS_DOMAIN_ID=' ~/.bashrc || echo 'export ROS_DOMAIN_ID=NR_COMPUTER' >> ~/.bashrc
+source ~/.bashrc
+```
+
+The above command will set the indicated domain ID in each terminal window. This will prevent nodes from being visible between different computers on the same network.
+
+## ROS2 Bag: Recording and Playback
+**ROS2 Bag** lets you record and replay topic data, useful for testing without a live robot:
+
+- **Record**: `ros2 bag record /topic1 /topic2`
+- **Play**: `ros2 bag play bag_name -r 0.5` (half speed)
+- **Info**: `ros2 bag info bag_name`
+
+---
+
+# Part 1: Mapping and Navigation in a Simple Environment
+
+In this part, you’ll use a simulated Turtlebot3 to build a 2D map with SLAM and navigate it with AMCL.
+
+## Key Concepts
+- **SLAM (Simultaneous Localization and Mapping)**: A technique where a robot builds a map of an unknown area while tracking its position. We’ll use Cartographer, a Google-developed SLAM system that creates maps from LIDAR data using graph optimization.
+
+<figure align="center">
+<img src="https://www.mathworks.com/discovery/slam/_jcr_content/mainParsys/band_1231704498_copy/mainParsys/lockedsubnav/mainParsys/columns_39110516/6046ff86-c275-45cd-87bc-214e8abacb7c/columns_463008322/7b029c5b-9826-4f96-b230-9a6ec96cb4ab/image.adapt.full.medium.png/1720000528959.png"
+alt="Advantages of cleaning robots using SLAM." width=60%>
+<figcaption>Advantages of cleaning robots using SLAM. <a href="https://www.mathworks.com/discovery/slam.html"><sup>source</sup></a></figcaption>
+</figure>
+
+- **AMCL (Adaptive Monte Carlo Localization)**: A method to locate a robot on a known map using particle filters — “guesses” of the robot’s position that refine over time.
+
+<figure align="center">
+<img 
+src="https://cmuq-robotics.github.io/_images/amcl_3.png"
+style="width: 400px; height: 300px; object-fit: none; object-position: 56.5% 46%;"><figcaption>Arrows are particles calculated by AMCL. <a href="https://cmuq-robotics.github.io/lab4.html"><sup>source</sup></a></figcaption></figure>
+
+- **Point Cloud**: A collection of 3D points (x, y, z) from sensors like LIDAR, representing the environment’s shape.
+<p align="center">
+  <img src="_images/point_cloud_car.png" style="display:inline-block;" width="40%">
+</p>
+
+## Environment preparation
+1. **Load the Docker Image**: Use `arm/lab03` (see [Before You Begin](#before-you-begin)).
+2. **Create a Contrainer**:
+- only CPU: Download and run [run_cpu.sh](https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab03-Lokalizacja2D/run_cpu.sh)
+- GPU: Download and run [run_gpu_nvidia.sh](https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab03-Lokalizacja2D/run_gpu_nvidia.sh)
+```bash
+wget <script_url>
+./run_*.sh
+```
+
+The container is named `ARM_03` by default.
+
+3. **Allow the container to display GUI applications**:
+```bash
+xhost +local:root
+```
+
+4. **Build the Workspace**:
+```bash
+cd /arm_ws
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install
+source install/setup.bash
+```
+
+> **NOTE**: You can attach a new terminal to the container using the following command: `docker exec -it ARM_03 bash`
+
+## Building the World Map
+1. **Set the Turtlebot3 Model**:
+```bash
+export TURTLEBOT3_MODEL=burger
+```
+Available options are: ```burger```, ```waffle``` and ```waffle_pi```.
+
+2. **Launch Gazebo Simulation**:
+```bash
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+```
+
+3. **Run Cartographer SLAM** (new terminal):
+```bash
+export TURTLEBOT3_MODEL=burger
+source install/setup.bash
+ros2 launch turtlebot3_cartographer cartographer.launch.py use_sim_time:=True
+```
+
+RViz will show the map-building process.
+
+
+4. **Move the Robot** with the `teleop` node for keyboard operation (new terminal):
+```bash
+ros2 run turtlebot3_teleop teleop_keyboard
+```
+Then, using the keys ```w```, ```a```, ```s```, ```d``` and ```x```, you need to control the robot so that the entire "world" map is built.
+
+<figure align="center">
+<img 
+src="https://emanual.robotis.com/assets/images/platform/turtlebot3/simulation/virtual_slam.png" width="80%">
+<figcaption>"turtlebot3_world" with a map built. <a href="https://emanual.robotis.com/docs/en/platform/turtlebot3/slam_simulation/"><sup>source</sup></a></figcaption>
+</figure>
+
+5. **Save the Map**:
+```bash
+cd /arm_ws
+mkdir maps
+ros2 run nav2_map_server map_saver_cli -f /arm_ws/maps/turtlebot3_world_map
+```
+This creates a `.yaml` and `.pgm` file representing the map.
+
+6. **Turn off the Simulation** with `Ctrl+C` in all terminals.
+
+## Navigating using the map
+1. **Launch Gazebo Simulation**:
+```bash
+export TURTLEBOT3_MODEL=burger
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+```
+
+2. **Launch Navigation2 Node** (new terminal):
+```bash
+ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True map:=/arm_ws/maps/turtlebot3_world_map.yaml
+```
+**Navigation2** is a ROS2 package for path planning and obstacle avoidance.
+
+3. **Set Initial Pose in RViz**:
+- Click ```2D Pose Estimate``` in the RViz window.
+- Click on the map in the place where you think the robot is located and drag it in the direction of its front.
+- Repeat until the particle cloud aligns with the robot’s actual location.
+
+<figure align="center">
+<img 
+src="https://emanual.robotis.com/assets/images/platform/turtlebot3/ros2/tb3_navigation2_rviz_01.png" width="80%">
+<figcaption><a href="https://emanual.robotis.com/docs/en/platform/turtlebot3/nav_simulation/"><sup>source</sup></a></figcaption>
+</figure>
+
+4. **Set Navigation Goal**:
+- Click `Navigation Goal` in RViz window.
+- Click and drag to set a destination. The robot will plan and follow a path.
+
+<figure align="center">
+<img 
+src="https://emanual.robotis.com/assets/images/platform/turtlebot3/ros2/tb3_navigation2_rviz_02.png" width="80%">
+<figcaption><a href="https://emanual.robotis.com/docs/en/platform/turtlebot3/nav_simulation/"><sup>source</sup></a></figcaption>
+</figure>
+
+## Play with Parameters
+In the ```turtlebot3_navigation2``` package, in the ```param``` folder (/arm_ws/src/turtlebot3/turtlebot3_navigation2/param), there is a file ```burger.yaml```. Verify how the modification of the following parameters affects the AMCL module operation:
+
+    1. ```beam_skip_distance``` when ```do_beamskip``` is set to ```True```\
+    2. ```laser_max_range``` and ```laser_min_range```
+    3. ```max_beams```
+    4. ```max_particles```
+    5. ```resample_interval```
+    6. ```update_min_a``` and ```update_min_d```
+
+# Part 2: 3D SLAM with Point Clouds
+
+Now, you’ll use **lidarslam** to build a 3D map from LIDAR data and analyze its performance.
+
+[lidarslam](https://github.com/rsasaki0109/lidarslam_ros2): A ROS2 package for 3D SLAM, creating detailed maps and robot trajectories from point clouds.
+
+<p align="center">
+<img src="_images/lidarslam.png" alt="Map created by lidarslam" title="Map created by lidarslam" width=40%>
+</p>
+
+<!-- ## Differences between odometry and mapping:
+- Odometry works on points from different time moments, mapping on points calculated to a single, common moment of time.
+- Odometry adjusts the scan to the scan, mapping the scan to the map (set of scans).
+- Odometry is faster (± constant time), mapping can be time-consuming (map grows). -->
+
+## Environment Preparation
+1. **Load the Docker Image**: Use `arm/lab06` (see [Before You Begin](#before-you-begin)).
+2. **Create a Container**:
+- only CPU: Download and run [run_cpu.sh](https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab06-SLAM3D/arm_06_run_cpu.sh)
+- GPU: Download and run [run_gpu_nvidia.sh](https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab06-SLAM3D/arm_06_run_gpu_nvidia.sh)
+```bash
+wget <script_url>
+./run_*.sh
+```
+
+The container is named ARM_06 by default.
+
+3. **Build the Workspace**:
+```bash
+cd /arm_ws
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install
+source install/setup.bash
+```
+
+> **NOTE**: You can attach a new terminal to the container using the following command: `docker exec -it ARM_06 bash`
+
+## Running lidarslam
+
+```shell
+cd /arm_ws
+source install/setup.bash
+ros2 launch lidarslam lidarslam.launch.py
+```
+
+RViz window should appear, where the localization and map building process will be visualized.
+
+## HDL_400
+
+1. Play the prepared bag file in a separate terminal with the following command:
+```bash
+ros2 bag play -p -r 0.5 bags/hdl_400
+```
+
+The replay process will start paused and with a ```rate``` of 0.5 of the normal speed.
+
+2. Add a ```PointCloud2``` data type to the visualization from the ```/velodyne_points``` topic in RViz. It contains the "current" readings from the [lidar](https://en.wikipedia.org/wiki/Lidar).
+
+3. Unpause the replay process of bag file by using space key in the appropriate terminal.
+
+4. Observe the different between maps from `/map` topic (raw map) and `/modified_map` topic (optimized map). Similarly observe the difference between `/path` and `/modified_path` topics. Unfortunately, there is not ground truth localization for this data, but you can see the map optimization process based on loop closure mechanism.
+
+   Loop closure is a technique in SLAM where the system recognizes when the robot has returned to a previously visited location. When a loop closure is detected, the system can correct accumulated drift errors by adjusting the entire trajectory and map. This results in a more accurate and consistent map, especially for long trajectories where odometry errors would otherwise accumulate.
+
+## KITTI 00
+
+A bag file with 200 first scans from the 00 sequence of the [KITTI](https://www.cvlibs.net/datasets/kitti/) dataset was prepared. The data also contain *ground truth* information, which can be used to assess the system performance.
+
+1. Restart lidarslam:
+```bash
+ros2 launch lidarslam lidarslam.launch.py
+```
+
+2. Play the Bag:
+```shell
+ros2 bag play -p bags/kitti
+```
+
+3. Add a ```Path``` data type to the visualization from the ```/path_gt_lidar``` topic in RViz. Additionally, change it's color to distinguish it from different paths (yellow and green).
+
+4. Unpause the replay process of bag file by using space key in the appropriate terminal.
+
+5. Observe the difference between the ```ground truth``` line and the path returned by SLAM.
+
+6. Repeat the experiment for ```-r``` equal to 0.3. What happens this time?
+
+## Play with the SLAM parameters
+Analyzing the [lidarslam](https://github.com/rsasaki0109/lidarslam_ros2) documentation and source code, and observing the system operation, please verify the impact of the following parameters from the ```/arm_ws/src/lidarslam_ros2/lidarslam/param/lidarslam.yaml``` file:
+
+1. ndt_resolution (scan_matcher i graph_based_slam)
+2. trans_for_mapupdate
+3. map_publish_period
+4. scan_period
+5. voxel_leaf_size
+6. loop_detection_period
+7. threshold_loop_closure_score
+8. distance_loop_closure
+9. range_of_searching_loop_closure
+10. search_submap_num
+
+# Sources and useful references
+
+🐢 [ROS2 - developer guide](https://docs.ros.org/en/humble/The-ROS2-Project/Contributing/Developer-Guide.html)
+
+🐢 [ROS2 - documentation](https://docs.ros.org/en/humble/index.html)
+
+🐢 [ROS2 - design](http://design.ros2.org/)
+
+🐢 [ROS2 - installation](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html) - Desktop Install
+
+🐢 [Turtlebot3 Simulation docs](https://emanual.robotis.com/docs/en/platform/turtlebot3/slam_simulation/)

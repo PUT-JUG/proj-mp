@@ -340,7 +340,9 @@ source install/setup.bash
 > **NOTE**: You can attach a new terminal to the container using the following command: `docker exec -it ARM_03 bash`
 
 > **IMPORTANT**: 
-> 1. Make sure to source the built environment and set the robot model in every terminal inside the container: `source install/setup.bash; export TURTLEBOT3_MODEL=burger
+>
+> 1. Make sure to source the built environment and set the robot model in every terminal inside the container: `source install/setup.bash; export TURTLEBOT3_MODEL=burger`
+>
 > 2. Set the environment variable `ROS_DOMAIN_ID` in a container as instructed [here](#multi-computer-setup).
 
 ## Building the World Map

@@ -339,6 +339,10 @@ source install/setup.bash
 
 > **NOTE**: You can attach a new terminal to the container using the following command: `docker exec -it ARM_03 bash`
 
+> **IMPORTANT**: 
+> 1. Make sure to source the built environment and set the robot model in every terminal inside the container: `source install/setup.bash; export TURTLEBOT3_MODEL=burger
+> 2. Set the environment variable `ROS_DOMAIN_ID` in a container as instructed [here](#multi-computer-setup).
+
 ## Building the World Map
 1. **Set the Turtlebot3 Model**:
 ```bash
@@ -518,16 +522,16 @@ ros2 bag play -p bags/kitti
 ## Play with the SLAM parameters
 Analyzing the [lidarslam](https://github.com/rsasaki0109/lidarslam_ros2) documentation and source code, and observing the system operation, please verify the impact of the following parameters from the ```/arm_ws/src/lidarslam_ros2/lidarslam/param/lidarslam.yaml``` file:
 
-1. ndt_resolution
-2. trans_for_mapupdate
-3. map_publish_period
-4. scan_period
-5. voxel_leaf_size
-6. loop_detection_period
-7. threshold_loop_closure_score
-8. distance_loop_closure
-9. range_of_searching_loop_closure
-10. search_submap_num
+1. `ndt_resolution`
+2. `trans_for_mapupdate`
+3. `map_publish_period`
+4. `scan_period`
+5. `voxel_leaf_size`
+6. `loop_detection_period`
+7. `threshold_loop_closure_score`
+8. `distance_loop_closure`
+9. `range_of_searching_loop_closure`
+10. `search_submap_num`
 
 # Sources and useful references
 

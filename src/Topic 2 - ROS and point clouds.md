@@ -300,7 +300,7 @@ alt="Advantages of cleaning robots using SLAM." width=70%>
 <figcaption>Advantages of cleaning robots using SLAM. <a href="https://www.mathworks.com/discovery/slam.html"><sup>source</sup></a></figcaption>
 </figure>
 
-- **AMCL (Adaptive Monte Carlo Localization)**: A method to locate a robot on a known map using particle filter. Particles are “guesses” of the robot’s position.
+- **AMCL (Adaptive Monte Carlo Localization)**: A method to locate a robot on a known map using particle filter. AMCL represents the robot’s possible positions as a set of particles, where each particle is a hypothesis of the robot’s location with an associated weight reflecting its likelihood. The algorithm updates these particles based on the robot’s motion (using a motion model) and sensor data (using a sensor model), then resamples them to focus on the most probable positions.
 
 <figure align="center">
 <img 

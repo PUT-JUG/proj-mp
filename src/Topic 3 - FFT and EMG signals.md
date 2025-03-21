@@ -50,7 +50,7 @@ np.allclose(dft(x), np.fft.fft(x)) #check if the results of both methods are sim
 Nyquist Frequency and Shannon's Theorem
 Nyquist frequency is the maximum frequency of spectral components of a signal subjected to the sampling process that can be reconstructed from a sequence of samples without distortion. Spectral components with frequencies higher than the Nyquist frequency become superimposed on components with other frequencies during sampling (aliasing phenomenon), which causes them to no longer be correctly reconstructed.
 
-According to the sampling theorem, for uniform sampling with a sampling interval \(T_{s}\), the condition for signal reconstruction is that the maximum signal frequency does not exceed half of the sampling frequency, \(f_{max}<f_{s}/2\) or \(f_{max}<1/{2T_{s}}\).
+According to the sampling theorem, for uniform sampling with a sampling interval T<sub>s</sub>, the condition for signal reconstruction is that the maximum signal frequency does not exceed half of the sampling frequency, f<sub>max</sub> < f<sub>s</sub>/2 or f<sub>max</sub> < 1/2T<sub>s</sub>.
 
 Let's assume that there is a code generating a harmonic signal:
 
@@ -101,7 +101,7 @@ Define the accuracy of reconstruction as the root mean square error (RMSE):
    RMSE=\sum_{i=0}^N \frac{1}{N}\cdot \sqrt{(s(i)- Re(\hat{x} i))^2}
    $$
 
-3. Load data form a file containing [EMG signals](https://chmura.put.poznan.pl/s/G285gnQVuCnfQAx/download?path=%2FData-HDF5&files=emg_gestures-12-repeats_short-2018-04-12-14-05-19-091.hdf5) using pandas. The signal sampling frequency is 5120Hz, and the file contains recordings from 24 channels of EMG from the forearm muscles during various hand gestures. In further analysis, use the `EMG_15` channel.
+3. Load data form a file containing [EMG signals](https://chmura.put.poznan.pl/s/HoUsRZAWdTviYgl) using pandas. The signal sampling frequency is 5120Hz, and the file contains recordings from 24 channels of EMG from the forearm muscles during various hand gestures. In further analysis, use the `EMG_15` channel.
    - Identify the frequencies of the 3 strongest components with an impulse spectrum.
    - Try to perform 10-time downsampling (selecting every 10th sample of the signal), plot the original and downsampled spectra on one figure, and try to explain the observed differences.
 

@@ -5,6 +5,7 @@
 
 ## Introduction
 In mathematics, the Fourier transform (FT) is a transform that converts a function into a form that describes the frequencies present in the original function. The output of the transform is a complex-valued function of frequency. The term Fourier transform refers to both this complex-valued function and the mathematical operation. When a distinction needs to be made the Fourier transform is sometimes called the frequency domain representation of the original function. The Fourier transform is analogous to decomposing the sound of a musical chord into terms of the intensity of its constituent pitches. <sup>[\[source\]](https://en.wikipedia.org/wiki/Fourier_transform)</sup>
+
 ### Discrete-time Fourier transform of an infinite signal
 <!-- ![wzór](./_images/lab01/discrete_inf_fft.png) -->
 $$
@@ -126,6 +127,7 @@ EMG signal can be processed many different ways. In the field of classification 
 
 ### Feature extraction
 In the current exercise, we rely on several basic amplitude features determined in a moving window:
+
 1. RMS value for a channel `i`:
 $$
 RMS_i=\sqrt{\frac{\sum_{j=1}^{n}\left(x_{i+j}-x_{i}\right)^{2}}{n}},
@@ -133,7 +135,7 @@ $$
 
 RMS results on a moving window are presented here:
 
-![rms](https://jug.dpieczynski.pl/lab-icmwr/_images/lab06/example-plot-of-rms-envelope.png)
+![rms](https://put-jug.github.io/lab-icmwr/_images/lab06/example-plot-of-rms-envelope.png)
 
 2. Number of zero-crossings
    $$
@@ -142,6 +144,7 @@ RMS results on a moving window are presented here:
    where `sign(x)` returns `1` if x is positive and `0` otherwise.
 
    In a threshold using approach, you can calculate it on corssing the threshold
+
 3. Activity detection
    
    The value of zero-crossings, after considering the dead zone, can be used to determin the begining of the contraction.
@@ -160,18 +163,22 @@ $$
 $$
 
 ## Tasks, part 2
+
 1. Load the [MVC signal](https://chmura.put.poznan.pl/s/4UuSx0lfK53FA7I) and [the training signal](https://chmura.put.poznan.pl/s/38aeyGzigLEHLbp)
+
 2. Write `rms` and `zc` functions that for each channel (`columns_emg`) will estimate the features described above
    ``` python
     feature_rms = rms(signal, window=500, stride=100, fs=5120, columns_emg=['EMG_8', 'EMG_9'])# window length and stride given in [ms]
     
     feature_zc = zc(signal, threshold=0.1, window=500, stride=100, fs=5120, columns_emg=['EMG_8', 'EMG_9'])# window length and stride given in [ms]
     ```
+
 3.  Analyzing column `TRAJ_GT` you should notice geasture `0`, corresponding to lack of movement (arm is in the neutral state) (more on the gestures can be found [here](https://biolab.put.poznan.pl/putemg-dataset/)). For each channel, determine the threshold value for the `zc` function, assuming that the threshold is the value that covers 95% of all noise samples. You can use *numpy.percentile*.
- ``` python
-    threshold = find_threshold(signal, columns_emg=['EMG_8', 'EMG_9'], column_gesture='TRAJ_GT', idle_gesture_id = 0)
-    
- ```
+``` python
+   threshold = find_threshold(signal, columns_emg=['EMG_8', 'EMG_9'], column_gesture='TRAJ_GT', idle_gesture_id = 0)
+   
+```
+
 4. Write function `norm_emg` that normalizes the EMG signal
 ``` python
     norm_coeffs = rms(signal_mvc, window=500, stride=100, fs=5120, columns_emg=['EMG_8', 'EMG_9']).max()

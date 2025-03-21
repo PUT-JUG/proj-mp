@@ -98,7 +98,7 @@ However, you need to know how this vector is generated and what is the value of 
 2. The Fourier transform is reversible. Try to reconstruct the time waveform using ifft (\\(\hat{x} = ifft(X)\\)). Plot the original and reconstructed signals on the same graph. Note: the ifft function returns a vector of complex numbers. Check what its imaginary part is. In the reconstruction plot, show its real part. What is the accuracy of the reconstruction if the signal has a length of 3s?
 Define the accuracy of reconstruction as the root mean square error (RMSE):
    $$
-   RMSE=\sum_{i=0}^N \frac{1}{N}\cdot \sqrt{(s(i)- Re(\hat{x} i))^2}
+   RMSE= \sqrt{\frac{1}{N}\sum_{i=0}^{N-1} (s(i)- Re(\hat{x}(i)))^2}
    $$
 
 3. Load data form a file containing [EMG signals](https://chmura.put.poznan.pl/s/HoUsRZAWdTviYgl) using pandas. The signal sampling frequency is 5120Hz, and the file contains recordings from 24 channels of EMG from the forearm muscles during various hand gestures. In further analysis, use the `EMG_15` channel.

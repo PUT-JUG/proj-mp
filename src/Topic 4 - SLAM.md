@@ -5,6 +5,7 @@ SLAM (Simultaneous Localization and Mapping) is the computational problem of con
 
 ## ORB-SLAM3
 [ORB-SLAM3](https://github.com/UZ-SLAMLab/ORB_SLAM3) is the first real-time SLAM library able to perform Visual, Visual-Inertial and Multi-Map SLAM with monocular, stereo and RGB-D cameras, using pin-hole and fisheye lens models. It is based on detecting the ORB features on an image, matching the features by the descriptors and final optimization. It is a third version of an ORB-SLAM system. A very brief changelog of versions:
+
 - 2015, ORB-SLAM - monocular version
 - 2017, ORB-SLAM2 - monocular, stereo vision, RGB-D versions
 - 2020, ORB-SLAM3 - monocular, stereo vision, RGB-D versions, with or without IMU measurements. Combining multiple maps for a full world map building.
@@ -40,13 +41,13 @@ Stereo vision is a technique used to perceive depth. It works by capturing two i
 
 <figure align="center">
 <img src="https://res.cloudinary.com/tbmg/c_scale,w_800,f_auto,q_auto/v1522165222/sites/tb/articles/2012/features/40438-121_fig3.jpg"
-alt="Example calibration images." width=40%>
+alt="Example calibration images." width=60%>
 <figcaption><a href="https://www.techbriefs.com/component/content/article/14925-a-guide-to-stereo vision-and-3d-imaging"><sup>source</sup></a></figcaption>
 </figure>
 
 
 # Running ORB-SLAM3 on the data custom stereo vision data:
-The ORB-SLAM3 system will be tested on the data recorded from the car which circled the Piotrowo campus. The whole route was about 1.3 km long. The data sequence consists of images from two cameras(~20 Hz), DGPS data (~10 Hz) and AHRS data (~200 Hz). DGPS data provided localization information with an accuracy of about several centimeters, which is enough for our purpose to evaluate the localization accuracy of the system.
+The ORB-SLAM3 system will be tested on the data recorded from the car which circled the Piotrowo campus. The whole route was about 1.3 km long. The data sequence consists of images from two cameras(~20 Hz), DGPS data (~10 Hz). DGPS data provided localization information with an accuracy of about several centimeters, which is enough for our purpose to evaluate the localization accuracy of the system.
 
 ## Environment preparation
 
@@ -81,6 +82,7 @@ source ~/.bashrc
 
 ## Stereo vision camera calibration
 To run the stereo vision version of the ORB-SLAM3 on our data, we have to provide the parameters of the used camera configuration. The initially prepared configuration file `PP.yaml` can be found in the `/arm_ws/src/orbslam3_ros2/config/stereo` directory. Current values are correct for a different camera configuration, so the task is to correct the values. You have to modify the following parameters:
+
 - `Camera.fx` - focal length
 - `Camera.fy` - focal length
 - `Camera.cx` - principal point coordinate
@@ -107,7 +109,7 @@ In short, a stereo vision system is calibrated by capturing multiple synchronize
 
 <figure align="center">
 <img src="https://cdn.araintelligence.com/images/calibration/stereo_image_21.jpg"
-alt="Example calibration images." width=40%>
+alt="Example calibration images." width=50%>
 <figcaption><a href="https://araintelligence.com/blogs/computer-vision/geometric-vision/camera_calibration"><sup>source</sup></a></figcaption>
 </figure>
 
@@ -144,6 +146,7 @@ Some of the parameters can be taken directly from the `kalibr` calibration outpu
 To obtain the `bf` value, `R`, and `P` matrices, we have to use [stereoRectify](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga617b1685d4059c6040827800e72ad2b6) function from `OpenCV`, which calculates the transformations (`R`, `P`) necessary to get and use the canonical camera configuration (re-project image planes onto a common plane parallel to the line between optical centers of images) for depth estimation. 
 
 You can use the prepared script template `/arm_ws/src/orbslam3_ros2/scripts/stereoCalibration.py`. Firstly, fill the values in the script, based on the above `kalibr` calibration output: 
+
 - `K1` and `K2` - camera intrinsics matrices,
 - `d1` and `d2` - distortion coefficients vectors
 - `R` - rotation matrix
@@ -169,7 +172,7 @@ Camera intrinsic matrix:
 [Homogeneous transformation matrix](https://mecharithm.com/learning/lesson/homogenous-transformation-matrices-configurations-in-robotics-12) (`T_cn_cnm1` is in this form):
 
 <p align="center">
-    <img src="_images/trans_matr.jpg" alt="https://automaticaddison.com/wp-content/uploads/2020/08/1-homogeneous-n-1-nJPG.jpg" title="" width=10%>
+    <img src="_images/trans_matr.jpg" alt="https://automaticaddison.com/wp-content/uploads/2020/08/1-homogeneous-n-1-nJPG.jpg" title="" width=20%>
 </p>
 
 ## Run ORB-SLAM3:

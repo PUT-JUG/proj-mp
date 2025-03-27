@@ -1,105 +1,13 @@
 # Introduction:
 SLAM (Simultaneous Localization and Mapping) is the computational problem of constructing or updating a map of an unknown environment while simultaneously keeping track of an agent's location within it.
 
-> **_IMPORTANT:_** Before proceeding further, start to download two docker images, one for each SLAM system that will be used:  [image for A-LOAM](https://chmura.put.poznan.pl/s/YB0jqEXZbAq9EAU) and [image for ORB-SLAM3](https://chmura.put.poznan.pl/s/T98vgBxYTNZqgHO). Moreover, download the following .bag files: [arm_put_car.bag](https://chmura.put.poznan.pl/s/9pkDucSDiPlwgsd) and [kitti00_200.bag](https://chmura.put.poznan.pl/s/FRYaqg0pFVklQt5).
+> **_IMPORTANT:_** Before proceeding further, start to download the [docker image](https://drive.google.com/file/d/1ug5cWpce5J-Ykewo_XonlAZYNBIe4dXT/view?usp=sharing).
 
-# LOAM
-LOAM is a standard 3D laser localization method introduced in [LOAM: Lidar Odometry and Mapping in Real-time](http://www.roboticsproceedings.org/rss10/p07.pdf). In short, LOAM takes point clouds as input. Based on them, it estimates the odometry by scan registration with feature matching approach and maps the environment. It is also possible to include IMU measurements in the process. It is focused on minimizing drift in odometry estimation and the classic LOAM version does not involve a loop closure mechanism.
-
-> **_HINT:_** The loop closure mechanism identifies revisited locations. Upon recognizing a return to a previously visited site, it corrects any accumulated errors in the estimated trajectory and map. This correction enhances the overall map accuracy and localization precision.
-
-The original code is not available anymore since the authors made it private, creating [kaarta](https://www.kaarta.com/) company. We will instead use [A-LOAM](https://github.com/HKUST-Aerial-Robotics/A-LOAM) - Advanced implementation of LOAM. It uses Eigen and Ceres Solver to simplify and create a clean code structure, which makes it a perfect learning material for SLAM beginners.
-
-## Very general steps of LOAM operation:
-1. The system detects edge and planar features in each scan based on local curvature and determines the exact moment of measurement for each point.
-2. Each scan is first matched to the previous one to roughly estimate the transformation (odometry) and 'straighten out' the point cloud.
-3. After 'straightening out', the scan is matched to the map (collection of all previous points) to further improve the quality of the alignment.
-
-
-<!-- Differences between odometry and mapping:
-- The odometry operates on points from different time steps, while mapping operates on points recalculated to a single, common time step.
-- Odometry matches scans to scans, mapping matches scans to maps (sets of scans).
-- Odometry is faster (± constant time), while mapping can be time-consuming (the map grows). -->
-
-
-# TODO:
-## Docker container setup
-A-LOAM implementation makes use of some dependencies e.g., CERES and PCL, so for convenience, the docker image with all installed dependencies was prepared ([image for A-LOAM](https://chmura.put.poznan.pl/s/YB0jqEXZbAq9EAU)). You can check the Dockerfile [here](https://github.com/MichalNowicki/LabARM/blob/main/Lab03-LokalizacjaLiDAR3D/Dockerfile).
-
-1. Load the downloaded docker image:
-```bash
-docker load < arm_image03.tar.gz
-```
-
-2. Run the docker container with [mp_loam_run_gpu_nvidia.sh](https://github.com/dmn-sjk/MPProject/blob/main/MP_LOAM/mp_loam_run_gpu_nvidia.sh) script if you have nvidia GPU or [mp_loam_run_cpu.sh](https://github.com/dmn-sjk/MPProject/blob/main/MP_LOAM/mp_loam_run_cpu.sh) script otherwise:
-```bash
-bash mp_loam_run_gpu_nvidia.sh
-```
-
-```bash
-bash mp_loam_run_cpu.sh
-```
-
-3. You can attach to a running container in another terminal with:
-```bash
-docker exec -it MP_LOAM bash
-```
-
-> **_IMPORTANT:_** Remember to give container access to the display for each terminal session you open with the command: ```xhost +local:root```.
-
-## A-LOAM setup
-
-1. Download A-LOAM repository:
-```bash
-cd /catkin_ws/src
-git clone https://github.com/HKUST-Aerial-Robotics/A-LOAM.git
-```
-
-2. Build the catkin workspace along with A-LOAM code and source the environment variables:
-```bash
-cd /catkin_ws
-catkin_make
-source devel/setup.bash
-```
-
-## Run A-LOAM:
-We will test the A-LOAM system with the use of publically available [KITTI Odometry dataset](https://www.cvlibs.net/datasets/kitti/eval_odometry.php). It consists of 22 sequences, for 11 of which there are ground truth trajectories that can be used for the evaluation of the SLAM system. The data is not saved as .bag files, so to process it in ROS one can use `kitti_helper.launch` from the `aloam_velodyne` package. The whole dataset weights a lot and there is no point in using all of it during the classes, so the .bag file ([kitti00_200.bag](https://chmura.put.poznan.pl/s/FRYaqg0pFVklQt5)) with the first 200 scans of 00 sequence was prepared.
-
-1. Run A-LOAM ROS node along with the visualisation in rviz:
-```bash
-roslaunch aloam_velodyne aloam_velodyne_HDL_64.launch
-```
-
-2. Replay the lidar data from downloaded .bag file:
-```bash
-rosbag play kitti00_200.bag
-```
-
-> **_HINT:_** You can copy data to the container with the `docker cp` command: `docker cp [FILE_TO_COPY] [CONTAINER_NAME]:[DIRECTORY_IN_THE_CONTAINER]`.
-
-Expected result:
-<p align="center">
-    <img src="_images/loam_kitty.png" title="" width=80%>
-</p>
-
-In rviz you can see:
-- the current point cloud scan (colored points)
-- built map (white points)
-- estimated trajectory (green line)
-- ground truth trajectory (orange line)
-
-> **_HINT:_** To see the ground truth trajectory click the square next to GT group in rviz:
-<p align="center">
-    <img src="_images/loam_gt.png" title="" width=40%>
-</p>
-
-Considering the clear implementation, you can conveniently analyze the code. Notice the order of point cloud processing in the following files: `laserMapping.cpp`, `laserOdometry.cpp`, `scanRegistration.cpp`.
-
-# ORB-SLAM3
+## ORB-SLAM3
 [ORB-SLAM3](https://github.com/UZ-SLAMLab/ORB_SLAM3) is the first real-time SLAM library able to perform Visual, Visual-Inertial and Multi-Map SLAM with monocular, stereo and RGB-D cameras, using pin-hole and fisheye lens models. It is based on detecting the ORB features on an image, matching the features by the descriptors and final optimization. It is a third version of an ORB-SLAM system. A very brief changelog of versions:
 - 2015, ORB-SLAM - monocular version
-- 2017, ORB-SLAM2 - monocular, stereovision, RGB-D versions
-- 2020, ORB-SLAM3 - monocular, stereovision, RGB-D versions, with or without IMU measurements. Combining multiple maps for a full world map building.
+- 2017, ORB-SLAM2 - monocular, stereo vision, RGB-D versions
+- 2020, ORB-SLAM3 - monocular, stereo vision, RGB-D versions, with or without IMU measurements. Combining multiple maps for a full world map building.
 
 ORB-SLAM3 system consist of three threads:
 - tracking thread - responsible for determining the change in position from frame to frame.
@@ -108,62 +16,102 @@ ORB-SLAM3 system consist of three threads:
 
 The threads work asynchronously, which leads to obtaining slightly different results upon different runs.
 
-## Steps of tracking (1-3) and mapping (4-6) processes:
+### Steps of ORB SLAM3 processes:
+Tracking:
+
 1. Detection and description of ORB features in the image.
 2. Matching features from the current and previous frame based on descriptors.
 3. Calculation of transformation.
+
+Mapping:
+
 4. Verification if the frame is a key one (needed for improving the system accuracy).
 5. Finding additional matches to the recently seen features from the map.
 6. Transformation correction.
 
-# TODO:
-We will test the [stereovision](https://en.wikipedia.org/wiki/Computer_stereo_vision) (obtaining 3D information from two cameras placed apart) version of the system on our own data ([arm_put_car.bag](https://chmura.put.poznan.pl/s/9pkDucSDiPlwgsd)) recorded from the car which circled the Piotrowo campus. The whole route was about 1.3 km long. The data sequence consists of images from two cameras(~20 Hz), DGPS data (~10 Hz) and AHRS data (~200 Hz). DGPS data provided localization information with an accuracy of about several centimeters, which is enough for our purpose to evaluate the localization accuracy of the system.
+## Stereo vision
+We will test the [stereo vision](https://en.wikipedia.org/wiki/Computer_stereo_vision) version of the ORB-SLAM3 system.
 
-## Docker container setup
-ORB-SLAM3 has a couple of dependencies (Pangolin, OpenCV, Eigen3) and a few inconveniences in order to build it for ROS, so to save your time the docker image with ORB-SLAM3 and its dependencies installed was prepared ([image for ORB-SLAM3](https://chmura.put.poznan.pl/s/T98vgBxYTNZqgHO)). You can check the Dockerfile [here](https://github.com/MichalNowicki/LabARM/blob/main/Lab04-ORBSLAM3/Dockerfile).
+Stereo vision is a technique used to perceive depth. It works by capturing two images of the same scene from slightly different viewpoints using two cameras. The process involves:
+1. Identifying corresponding points: Features present in both images are matched.
+2. Calculating disparity: The difference in position (horizontal shift) of these corresponding points between the two images is measured.
+3. Determining depth: The disparity is inversely proportional to the distance from the cameras—larger disparities indicate closer objects, while smaller disparities indicate farther ones.
+4. By analyzing this disparity across the images, a depth map can be computed, enabling 3D visualization of the scene.
 
-1. Load the downloaded docker image:
+<figure align="center">
+<img src="https://res.cloudinary.com/tbmg/c_scale,w_800,f_auto,q_auto/v1522165222/sites/tb/articles/2012/features/40438-121_fig3.jpg"
+alt="Example calibration images." width=40%>
+<figcaption><a href="https://www.techbriefs.com/component/content/article/14925-a-guide-to-stereo vision-and-3d-imaging"><sup>source</sup></a></figcaption>
+</figure>
+
+
+# Running ORB-SLAM3 on the data custom stereo vision data:
+The ORB-SLAM3 system will be tested on the data recorded from the car which circled the Piotrowo campus. The whole route was about 1.3 km long. The data sequence consists of images from two cameras(~20 Hz), DGPS data (~10 Hz) and AHRS data (~200 Hz). DGPS data provided localization information with an accuracy of about several centimeters, which is enough for our purpose to evaluate the localization accuracy of the system.
+
+## Environment preparation
+
+1. **Allow the container to display GUI applications** (on a host machine):
 ```bash
-docker load < arm_image04.tar.gz
+xhost +local:root
 ```
 
-2. Run the docker container with [mp_orb3_run_gpu_nvidia.sh](https://github.com/dmn-sjk/MPProject/blob/main/MP_ORB3/mp_orb3_run_gpu_nvidia.sh) script if you have nvidia GPU or [mp_orb3_run_cpu.sh](https://github.com/dmn-sjk/MPProject/blob/main/MP_ORB3/mp_orb3_run_cpu.sh) script otherwise:
+2. Load the downloaded docker image with ORB-SLAM3 setup. You can also use the [Dockerfile](https://drive.google.com/file/d/1y3yZX7dSAYyjK3ouSu1jaTQAgyGrHHVj/view?usp=sharing) to build the image yourself but it will likely take more time.
 ```bash
-bash mp_orb3_run_gpu_nvidia.sh
+docker load < path/to/file.tar.gz
 ```
 
+3. Download and run the docker image building script:
 ```bash
-bash mp_orb3_run_cpu.sh
+wget https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab07-ORB-SLAM/arm_07_build.sh
+bash arm_07_build.sh
 ```
 
-3. You can attach to a running container in another terminal with:
+4. Download the script for running the docker container: [arm_07_run_gpu_nvidia.sh](https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab07-ORB-SLAM/arm_07_run_gpu_nvidia.sh) if you use nvidia GPU or [arm_07_run_cpu.sh](https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab07-ORB-SLAM/arm_07_run_cpu.sh) script otherwise. Run the container:
 ```bash
-docker exec -it MP_ORB3 bash
-``` 
+wget <script_link>
+bash <script_name>.sh
+```
+> **NOTE**: You can attach a new terminal to the container using the following command: `docker exec -it ARM_07 bash`
 
-## Stereo vision camera calibration:
-To run the stereovision version of the ORB-SLAM3 on our data we have to provide the parameters of the used camera configuration. The initially prepared configuration file `PP.yaml` can be found in the `/ORB-SLAM3/Examples/Stereo` directory. Current values are correct for a different camera configuration, so the task is to correct the values. You have to modify the following parameters:
-- Camera.fx - focal length
-- Camera.fy - focal length
-- Camera.cx - principal point coordinate
-- Camera.cy - principal point coordinate
-- Camera.width (set to 720)
-- Camera.height (set to 540)
-- Camera.bf - horizontal focal length multiplied by the baseline of stereovision system. It refers to the absolute value located in the upper right corner of the P2 matrix in output of `stereoRectify` script mentioned below. The baseline is the distance between cameras.
-- LEFT.height (set to 540)
-- LEFT.width (set to 720)
-- LEFT.D - distortion coefficients of left camera
-- LEFT.K - camera intrinsic matrix of left camera
-- LEFT.R - rectification transform (rotation matrix) for the left camera
-- LEFT.P - projection matrix in the rectified coordinate systems for the left camera
-- RIGHT.height (set to 540)
-- RIGHT.width (set to 720)
-- RIGHT.D - distortion coefficients of right camera
-- RIGHT.K - camera intrinsic matrix of right camera
-- RIGHT.R - rectification transform (rotation matrix) for the right camera
-- RIGHT.P - projection matrix in the rectified coordinate systems for the right camera
+5. Set ROS_DOMAIN_ID environment variable (replace `<CHOSEN_NUMBER>` with a random number between 0-101 or 215-232):
+```bash
+grep -q ^'export ROS_DOMAIN_ID=' ~/.bashrc || echo 'export ROS_DOMAIN_ID=<CHOSEN_NUMBER>' >> ~/.bashrc
+source ~/.bashrc
+```
 
-To obtain all of the necessary stereovision system parameters, it has to be calibrated. In this example, it was already done with the use of [kalibr toolbox](https://github.com/ethz-asl/kalibr). [Here](https://github.com/ethz-asl/kalibr/wiki/multiple-camera-calibration) is the description of how it was done. The output of the calibration process was the following (you can also find it in `/ORB_SLAM3/scripts/stereoCalibrationResult.txt`):
+## Stereo vision camera calibration
+To run the stereo vision version of the ORB-SLAM3 on our data, we have to provide the parameters of the used camera configuration. The initially prepared configuration file `PP.yaml` can be found in the `/arm_ws/src/orbslam3_ros2/config/stereo` directory. Current values are correct for a different camera configuration, so the task is to correct the values. You have to modify the following parameters:
+- `Camera.fx` - focal length
+- `Camera.fy` - focal length
+- `Camera.cx` - principal point coordinate
+- `Camera.cy` - principal point coordinate
+- `Camera.width` - width of the camera image in pixels (set it to 720)
+- `Camera.height` - height of the camera image in pixels (set it to 540)
+- `Camera.bf` - horizontal focal length multiplied by the baseline of stereo vision system. It refers to the absolute value located in the upper right corner of the P2 matrix in the output of `stereoRectify` script mentioned below. The baseline of the stereo vision system is the distance between cameras.
+- `LEFT.height` - height of the left camera image in pixels (set it to 540)
+- `LEFT.width` - width of the left camera image in pixels (set it to 720)
+- `LEFT.D` - distortion coefficients of left camera
+- `LEFT.K` - camera intrinsic matrix of left camera
+- `LEFT.R` - rectification transform (rotation matrix) for the left camera
+- `LEFT.P` - projection matrix in the rectified coordinate systems for the left camera
+- `RIGHT.height` - height of the right camera image in pixels (set it to 540)
+- `RIGHT.width` - width of the right camera image in pixels (set it to 720)
+- `RIGHT.D` - distortion coefficients of right camera
+- `RIGHT.K` - camera intrinsic matrix of right camera
+- `RIGHT.R` - rectification transform (rotation matrix) for the right camera
+- `RIGHT.P` - projection matrix in the rectified coordinate systems for the right camera
+
+To obtain all of the necessary stereo vision system parameters, it has to be calibrated. In this example, it was already done with the use of [kalibr toolbox](https://github.com/ethz-asl/kalibr). [Here](https://github.com/ethz-asl/kalibr/wiki/multiple-camera-calibration) is the description of how it was done.
+
+In short, a stereo vision system is calibrated by capturing multiple synchronized image pairs of a known calibration pattern, such as a checkerboard, using both cameras. The calibration pattern has to be visible in the field of view of both cameras. Feature points (e.g., corners) are detected in each image, and their correspondences across the two views are identified. Such set of images is used ot estimate the intrinsic parameters of both cameras (focal length, principal point, distortion coefficients) and extrinsic parameters of a stereo vision system (rotation and translation between cameras) using an optimization process.
+
+<figure align="center">
+<img src="https://cdn.araintelligence.com/images/calibration/stereo_image_21.jpg"
+alt="Example calibration images." width=40%>
+<figcaption><a href="https://araintelligence.com/blogs/computer-vision/geometric-vision/camera_calibration"><sup>source</sup></a></figcaption>
+</figure>
+
+The output of the calibration process from `kalibr` was the following:
 ```bash
 cam0:
   cam_overlaps: [1]
@@ -191,13 +139,26 @@ cam1:
 
 > **_HINT:_** The explanation of the output above can be found [here](https://github.com/ethz-asl/kalibr/wiki/yaml-formats) and [here](https://github.com/ethz-asl/kalibr/wiki/supported-models). `kalibr` notation of camera intrinsics [fu fv pu pv] is equivalent to [fx fy cx cy].
 
-Some of the parameters can be taken directly from the `kalibr` calibration output. To obtain the `bf` value, `R`, and `P` matrices, we have to use [stereoRectify](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga617b1685d4059c6040827800e72ad2b6) function from `OpenCV`, which calculates the transformations (`R`, `P`) necessary to get and use the canonical camera configuration (re-project image planes onto a common plane parallel to the line between optical centers of images) for depth estimation. You can use the prepared script template `/ORB-SLAM3/scripts/stereoCalibration.py` and fill the values of `K` (camera intrinsic matrix), `d` (distortion coefficients vector), `R` (rotation matrix) and `T` (translation vector). You should also adjust the image size in `stereoRectify()`function call from (0, 0) to (720, 540). To get the output of `stereoRectify()` run:
+Some of the parameters can be taken directly from the `kalibr` calibration output (`Camera.fx`, `Camera.fy`, `Camera.cx`, `Camera.cy`, `LEFT.height`, `LEFT.width`, `LEFT.D`, `LEFT.K`, `RIGHT.height`, `RIGHT.width`, `RIGHT.D`, `RIGHT.K`). 
 
+To obtain the `bf` value, `R`, and `P` matrices, we have to use [stereoRectify](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga617b1685d4059c6040827800e72ad2b6) function from `OpenCV`, which calculates the transformations (`R`, `P`) necessary to get and use the canonical camera configuration (re-project image planes onto a common plane parallel to the line between optical centers of images) for depth estimation. 
+
+You can use the prepared script template `/arm_ws/src/orbslam3_ros2/scripts/stereoCalibration.py`. Firstly, fill the values in the script, based on the above `kalibr` calibration output: 
+- `K1` and `K2` - camera intrinsics matrices,
+- `d1` and `d2` - distortion coefficients vectors
+- `R` - rotation matrix
+- `T` - translation vector. 
+
+You should also adjust the image size in `stereoRectify()`function call from (0, 0) to (720, 540). 
+
+To get the output of `stereoRectify()` run:
 ```bash
-python /ORB_SLAM3/scripts/stereoCalibration.py
+python /arm_ws/src/orbslam3_ros2/scripts/stereoCalibration.py
 ```
 
-> **_HINT:_** Notice if the transformation (R, T) is meant to transform the coordination system of left camera to the coordinate system of right camera or the other way around.
+<!-- > **_HINT:_** Notice if the transformation (R, T) is meant to transform the coordination system of left camera to the coordinate system of right camera or the other way around. -->
+
+### Useful knowledge:
 
 Camera intrinsic matrix:
 
@@ -208,39 +169,34 @@ Camera intrinsic matrix:
 [Homogeneous transformation matrix](https://mecharithm.com/learning/lesson/homogenous-transformation-matrices-configurations-in-robotics-12) (`T_cn_cnm1` is in this form):
 
 <p align="center">
-    <img src="_images/trans_matr.png" alt="https://automaticaddison.com/wp-content/uploads/2020/08/1-homogeneous-n-1-nJPG.jpg" title="" width=25%>
+    <img src="_images/trans_matr.jpg" alt="https://automaticaddison.com/wp-content/uploads/2020/08/1-homogeneous-n-1-nJPG.jpg" title="" width=10%>
 </p>
 
 ## Run ORB-SLAM3:
 
-1. Run roscore:
+1. Run ORB-SLAM3 ROS node along with the visualization:
 ```bash
-roscore
+ros2 run orbslam3 stereo /arm_ws/src/orbslam3_ros2/vocabulary/ORBvoc.txt /arm_ws/src/orbslam3_ros2/config/stereo/PP.yaml true
 ```
 
-2. Run ORB-SLAM3 ROS node along with the visualization (insert the correct topic names for the left and right camera topics - `rosbag info [.bag file]`):
+2. Replay the bag file:
 ```bash
-cd /ORB_SLAM3/
-rosrun ORB_SLAM3 Stereo /ORB_SLAM3/Vocabulary/ORBvoc.txt Examples/Stereo/PP.yaml true [topicLeft] [topicRight]
+ros2 bag play -r 0.25 bags/put_car -p --remap /pylon_stereo_node/left/image_raw:=/camera/left /pylon_stereo_node/right/image_raw:=/camera/right
 ```
 
-3. Replay the lidar data from the downloaded .bag file:
-```bash
-rosbag play -r 0.25 --pause arm_put_car.bag
-```
-> **_HINT:_** --pause means that the data will be played after pressing the spacebar. Since the ORB-SLAM3 is quite computationally demanding, we slow down the publish rate with the -r flag (0.25 - 4 times slower).
-
-4. After the replay of all data, shut down the ORB-SLAM3 node with `ctrl + c`. The output trajectory will be saved to `FrameTrajectory_TUM_Format.txt`. Move it to the `scripts` directory:
-```bash
-mv /ORB_SLAM3/FrameTrajectory_TUM_Format.txt /ORB_SLAM3/scripts/orbslam3.txt
-```
+3. After the replay of all data, shut down the ORB-SLAM3 node with `ctrl + c` in the terminal where the node is running. The output trajectory will be saved.
 
 ## Trajectory evaluation:
-To evaluate the output trajectory we will compare it with the DGPS data as a ground truth. DGPS data is already processed to the correct format (TUM trajectory format with poses in [UTM coordinate system](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system)). You can download it from [here](https://chmura.student.put.poznan.pl/s/7axxzw5EXqaM2Oy). We will use the evaluation script from the ORB-SLAM3 repository: `avaluate_ate.py`. Run the evaluation with:
+To evaluate the output trajectory we will compare it with the DGPS data as a ground truth. DGPS data was already processed to the correct format (TUM trajectory format with poses in [UTM coordinate system](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system)). 
 
+1. Download the DGPS ground truth data:
 ```bash
-cd /ORB_SLAM3/scripts
-python evaluate_ate.py dgps.txt orbslam3.txt --verbose --plot trajs.png
+wget https://chmura.student.put.poznan.pl/s/7axxzw5EXqaM2Oy/download -O dgps.txt
+```
+
+2. Run the evaluation using the prepared script:
+```bash
+python3 /arm_ws/src/orbslam3_ros2/scripts/evaluate_ate.py <DGPS_DATA_PATH> <ORBSLAM_OUTPUT_PATH> --verbose --plot trajs.png
 ```
 
 Example output:
@@ -256,7 +212,9 @@ absolute_translational_error.max 35.219433 m
 
 The script computes the best overlap of the two given trajectories and calculates the absolute translational error. The system is not deterministic so the results can vary a little between runs. The output trajectories can be displayed with:
 ```bash
-eog trajs.png
+apt update
+apt install viewnior
+viewnior trajs.png
 ```
 
 Example trajectories:

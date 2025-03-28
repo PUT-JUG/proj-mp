@@ -11,6 +11,7 @@ SLAM (Simultaneous Localization and Mapping) is the computational problem of con
 - 2020, ORB-SLAM3 - monocular, stereo vision, RGB-D versions, with or without IMU measurements. Combining multiple maps for a full world map building.
 
 ORB-SLAM3 system consist of three threads:
+
 - tracking thread - responsible for determining the change in position from frame to frame.
 - mapping thread - responsible for improving localization accuracy by optimizing the connected poses and points in the map.
 - loop closure thread - responsible for detecting the return to a known location and correcting drift.
@@ -34,6 +35,7 @@ Mapping:
 We will test the [stereo vision](https://en.wikipedia.org/wiki/Computer_stereo_vision) version of the ORB-SLAM3 system.
 
 Stereo vision is a technique used to perceive depth. It works by capturing two images of the same scene from slightly different viewpoints using two cameras. The process involves:
+
 1. Identifying corresponding points: Features present in both images are matched.
 2. Calculating disparity: The difference in position (horizontal shift) of these corresponding points between the two images is measured.
 3. Determining depth: The disparity is inversely proportional to the distance from the cameras—larger disparities indicate closer objects, while smaller disparities indicate farther ones.
@@ -61,20 +63,20 @@ xhost +local:root
 docker load < path/to/file.tar.gz
 ```
 
-3. Download and run the docker image building script:
+<!-- 3. Download and run the docker image building script:
 ```bash
 wget https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab07-ORB-SLAM/arm_07_build.sh
 bash arm_07_build.sh
-```
+``` -->
 
-4. Download the script for running the docker container: [arm_07_run_gpu_nvidia.sh](https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab07-ORB-SLAM/arm_07_run_gpu_nvidia.sh) if you use nvidia GPU or [arm_07_run_cpu.sh](https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab07-ORB-SLAM/arm_07_run_cpu.sh) script otherwise. Run the container:
+3. Download the script for running the docker container: [arm_07_run_gpu_nvidia.sh](https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab07-ORB-SLAM/arm_07_run_gpu_nvidia.sh) if you use nvidia GPU or [arm_07_run_cpu.sh](https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab07-ORB-SLAM/arm_07_run_cpu.sh) script otherwise. Run the container:
 ```bash
 wget <script_link>
 bash <script_name>.sh
 ```
 > **NOTE**: You can attach a new terminal to the container using the following command: `docker exec -it ARM_07 bash`
 
-5. Set ROS_DOMAIN_ID environment variable (replace `<CHOSEN_NUMBER>` with a random number between 0-101 or 215-232):
+4. Set ROS_DOMAIN_ID environment variable (replace `<CHOSEN_NUMBER>` with a random number between 0-101 or 215-232):
 ```bash
 grep -q ^'export ROS_DOMAIN_ID=' ~/.bashrc || echo 'export ROS_DOMAIN_ID=<CHOSEN_NUMBER>' >> ~/.bashrc
 source ~/.bashrc

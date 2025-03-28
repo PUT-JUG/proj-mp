@@ -63,11 +63,11 @@ xhost +local:root
 docker load < path/to/file.tar.gz
 ```
 
-<!-- 3. Download and run the docker image building script:
+2a. If you build the docker image from Dockerfile, download and run the docker image building script:
 ```bash
 wget https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab07-ORB-SLAM/arm_07_build.sh
 bash arm_07_build.sh
-``` -->
+```
 
 3. Download the script for running the docker container: [arm_07_run_gpu_nvidia.sh](https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab07-ORB-SLAM/arm_07_run_gpu_nvidia.sh) if you use nvidia GPU or [arm_07_run_cpu.sh](https://raw.githubusercontent.com/kamilmlodzikowski/LabARM/main/Lab07-ORB-SLAM/arm_07_run_cpu.sh) script otherwise. Run the container:
 ```bash

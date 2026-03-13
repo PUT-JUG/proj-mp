@@ -113,7 +113,7 @@ Define the accuracy of reconstruction as the root mean square error (RMSE):
    RMSE= \sqrt{\frac{1}{N}\sum_{i=0}^{N-1} (s(i)- Re(\hat{x}(i)))^2}
    $$
 
-3. Load data form a file containing [EMG signals](https://chmura.put.poznan.pl/s/HoUsRZAWdTviYgl) using pandas. The signal sampling frequency is 5120Hz, and the file contains recordings from 24 channels of EMG from the forearm muscles during various hand gestures. In further analysis, use the `EMG_15` channel.
+3. Load data form a file containing EMG signals (available on eKursy page, under this topic) using pandas. The signal sampling frequency is 5120Hz, and the file contains recordings from 24 channels of EMG from the forearm muscles during various hand gestures. In further analysis, use the `EMG_15` channel.
    - Identify the frequencies of the 3 strongest components with an impulse spectrum.
    - Try to perform 10-time downsampling (selecting every 10th sample of the signal), plot the original and downsampled spectra on one figure, and try to explain the observed differences.
 
@@ -165,11 +165,13 @@ RMS results on a moving window are presented here:
 The normalization operation is one of the basic requirements for effective classification. In the analysis of EMG signals, the amplitude of the EMG signal depends on individual characteristics, electrode location, and physical parameters of the electrode-skin contact. Typically, to obtain repeatable EMG signal effects, it is normalized relative to the maximum contraction of any muscle, meaning the EMG signal value during which the user generates maximum muscle contraction force (e.g. gripping a fist).
 
 The normalization coefficient can be determined separately for each channel/muscle. The most commonly used value is the RMS value in a 500ms or longer window (depending on the duration of the contraction). The maximum observed RMS value for a given channel is usually taken as the coefficient value.
+
 $$
 norm_i = max(RMS_i)  
 $$
 
 Signal normalization:
+
 $$
 ^{norm}x_i = x_i/norm_i
 $$

@@ -130,7 +130,7 @@ In the current exercise, we rely on several basic amplitude features determined 
 
 1. RMS value for a channel `i`:
 $$
-RMS_i=\sqrt{\frac{\sum_{j=1}^{n}\left(x_{i+j}-x_{i}\right)^{2}}{n}},
+RMS_i=\sqrt{\frac{1}{n}\sum_{j=0}^{n-1} x_{i+j}^2}
 $$
 
 RMS results on a moving window are presented here:
@@ -143,11 +143,11 @@ RMS results on a moving window are presented here:
    $$
    where `sign(x)` returns `1` if x is positive and `0` otherwise.
 
-   In a threshold using approach, you can calculate it on corssing the threshold
+   In a threshold-based approach, you can calculate it based on crossing the threshold.
 
 3. Activity detection
    
-   The value of zero-crossings, after considering the dead zone, can be used to determin the begining of the contraction.
+   The value of zero-crossings, after considering the dead zone, can be used to determine the beginning of the contraction.
 
 ### Normalization
 The normalization operation is one of the basic requirements for effective classification. In the analysis of EMG signals, the amplitude of the EMG signal depends on individual characteristics, electrode location, and physical parameters of the electrode-skin contact. Typically, to obtain repeatable EMG signal effects, it is normalized relative to the maximum contraction of any muscle, meaning the EMG signal value during which the user generates maximum muscle contraction force (e.g. gripping a fist).
@@ -159,7 +159,7 @@ $$
 
 Signal normalization:
 $$
-^{norm}x_i = x_1/norm_i
+^{norm}x_i = x_i/norm_i
 $$
 
 ## Tasks, part 2
@@ -173,7 +173,7 @@ $$
     feature_zc = zc(signal, threshold=0.1, window=500, stride=100, fs=5120, columns_emg=['EMG_8', 'EMG_9'])# window length and stride given in [ms]
     ```
 
-3.  Analyzing column `TRAJ_GT` you should notice geasture `0`, corresponding to lack of movement (arm is in the neutral state) (more on the gestures can be found [here](https://biolab.put.poznan.pl/putemg-dataset/)). For each channel, determine the threshold value for the `zc` function, assuming that the threshold is the value that covers 95% of all noise samples. You can use *numpy.percentile*.
+3.  Analyzing column `TRAJ_GT` you should notice gesture `0`, corresponding to lack of movement (arm is in the neutral state) (more on the gestures can be found [here](https://biolab.put.poznan.pl/putemg-dataset/)). For each channel, determine the threshold value for the `zc` function, assuming that the threshold is the value that covers 95% of all noise samples. You can use *numpy.percentile*.
 ``` python
    threshold = find_threshold(signal, columns_emg=['EMG_8', 'EMG_9'], column_gesture='TRAJ_GT', idle_gesture_id = 0)
    

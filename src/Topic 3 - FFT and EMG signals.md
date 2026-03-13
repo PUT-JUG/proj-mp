@@ -93,9 +93,21 @@ xf = fftfreq(N, 1/fs)
 However, you need to know how this vector is generated and what is the value of a single frequency quantum (the spectral resolution).
 
 ## Tasks
-1. Please generate a signal \\(s(t)=sin(2\pi\cdot t \cdot 1)+sin(2\pi \cdot t\cdot3+\pi/5)\\) of lengths 1, 2.5s and 3s, sampled at 100 Hz, calculate its Fourier transform using fft (\\(X=fft(s)\\)). How do the observed spectra differ and what could be the reasons for these differences?
+1. Please generate a signal
+   $$
+   s(t)=sin(2\pi\cdot t \cdot 1)+sin(2\pi \cdot t\cdot3+\pi/5)
+   $$
+   of lengths 1, 2.5s and 3s, sampled at 100 Hz, and calculate its Fourier transform using fft:
+   $$
+   X=fft(s)
+   $$
+   How do the observed spectra differ and what could be the reasons for these differences?
 
-2. The Fourier transform is reversible. Try to reconstruct the time waveform using ifft (\\(\hat{x} = ifft(X)\\)). Plot the original and reconstructed signals on the same graph. Note: the ifft function returns a vector of complex numbers. Check what its imaginary part is. In the reconstruction plot, show its real part. What is the accuracy of the reconstruction if the signal has a length of 3s?
+2. The Fourier transform is reversible. Try to reconstruct the time waveform using ifft:
+   $$
+   \hat{x} = ifft(X)
+   $$
+   Plot the original and reconstructed signals on the same graph. Note: the ifft function returns a vector of complex numbers. Check what its imaginary part is. In the reconstruction plot, show its real part. What is the accuracy of the reconstruction if the signal has a length of 3s?
 Define the accuracy of reconstruction as the root mean square error (RMSE):
    $$
    RMSE= \sqrt{\frac{1}{N}\sum_{i=0}^{N-1} (s(i)- Re(\hat{x}(i)))^2}

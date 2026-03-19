@@ -1,7 +1,7 @@
 # Goals of the Class
 In this class, you will use ROS2 (Robot Operating System 2) to perform 2D SLAM (Simultaneous Localization and Mapping) and AMCL (Adaptive Monte Carlo Localization) with a simulated Turtlebot3 robot. Moreover, you will map the real 3D environment using data recorded from 3D LIDAR sensor. You will:
 
-- Generate a 2D map of the robot’s environment using LIDAR data.
+- Generate a 2D map of the robot’s environment using LIDAR.
 - Enable the robot to navigate autonomously within this known map.
 - Extend your skills to 3D localization by creating a 3D map using a laser scanner and the lidarslam package.
 
@@ -165,10 +165,10 @@ source ~/.bashrc
 
 # Part 1: 2D Point Cloud SLAM and Navigation in a Simple Environment
 
-In this part, you’ll use a simulated Turtlebot3 to build a 2D map with SLAM and navigate it with AMCL.
+In this part, you’ll use a simulated Turtlebot3 to build a 2D map with SLAM and localize it within a known map with AMCL.
 
 ## Key Concepts
-- **SLAM (Simultaneous Localization and Mapping)**: A technique where a robot builds a map of an unknown area while tracking its position. Here, we will use [Cartographer](https://google-cartographer-ros.readthedocs.io/en/latest/algo_walkthrough.html), a Google-developed SLAM system that creates maps from [LIDAR](https://en.wikipedia.org/wiki/Lidar) data using graph optimization.
+- **SLAM (Simultaneous Localization and Mapping)**: A technique where a robot builds a map of an unknown area while tracking its position. Here, we will use [Cartographer](https://google-cartographer-ros.readthedocs.io/en/latest/algo_walkthrough.html), a Google-developed SLAM system that localizes and creates maps from [LIDAR](https://en.wikipedia.org/wiki/Lidar) data. It uses scan matching to estimate relative motion between consecutive point clouds and refines the localization estimates using pose graph optimization.
 
 <figure align="center">
 <img src="https://www.mathworks.com/discovery/slam/_jcr_content/mainParsys/band_1231704498_copy/mainParsys/lockedsubnav/mainParsys/columns_39110516/6046ff86-c275-45cd-87bc-214e8abacb7c/columns_463008322/7b029c5b-9826-4f96-b230-9a6ec96cb4ab/image.adapt.full.medium.png/1720000528959.png"
@@ -293,14 +293,13 @@ src="https://emanual.robotis.com/assets/images/platform/turtlebot3/navigation/tb
 </figure>
 
 ## Play with Parameters
-In the ```turtlebot3_navigation2``` package, there is a config file ```/arm_ws/src/turtlebot3/turtlebot3_navigation2/param/burger.yaml```. You can verify how the modification of the following parameters affects the AMCL module operation:
+In the ```turtlebot3_navigation2``` package, there is a config file ```/arm_ws/src/turtlebot3/turtlebot3_navigation2/param/burger.yaml```. You can verify how the modification of the following parameters affect the AMCL module operation:
 
-  1. ```beam_skip_distance``` when ```do_beamskip``` is set to ```True```
-  2. ```laser_max_range``` and ```laser_min_range```
-  3. ```max_beams```
-  4. ```max_particles```
-  5. ```resample_interval```
-  6. ```update_min_a``` and ```update_min_d```
+  1. ```laser_max_range``` and ```laser_min_range```
+  2. ```max_beams```
+  3. ```max_particles```
+  4. ```resample_interval```
+  5. ```update_min_a``` and ```update_min_d```
 
 Install you favorite editor if needed, e.g.:
 ```bash
@@ -312,7 +311,9 @@ apt install vim
 
 Now, you’ll use [lidarslam](https://github.com/rsasaki0109/lidarslam_ros2) to build a 3D map from LIDAR data and analyze its performance.
 
-**lidarslam**: A ROS2 package for 3D SLAM using point clouds. It uses scan matching method to calculate the relative transformation between consecutive LIDAR scans to get the initial estimate of the motion ([NDT](https://en.wikipedia.org/wiki/Normal_distributions_transform) by default). Moreover, it refines the intial pose estimates and ensures long-term consistency of the map by graph-based pose optimization. It includes loop closure mechanism.
+**lidarslam**: A ROS2 package for 3D SLAM using point clouds. It uses scan matching method to calculate the relative transformation between consecutive LIDAR scans to get the initial estimate of the motion (i.e., [Normal Distributions Transform (NDT)](https://en.wikipedia.org/wiki/Normal_distributions_transform) by default). Moreover, it refines the intial pose estimates and ensures long-term consistency of the map by graph-based pose optimization. It includes loop closure mechanism.
+
+Loop closure is a technique in SLAM where the system recognizes when the robot has returned to a previously visited location. When a loop closure is detected, the system can correct accumulated drift errors by adjusting the entire trajectory and map. This results in a more accurate and consistent map, especially for long trajectories where odometry errors would otherwise accumulate.
 
 <p align="center">
 <img src="_images/lidarslam.png" alt="Map created by lidarslam" title="Map created by lidarslam" width=60%>
@@ -367,8 +368,6 @@ The replay process will start paused and with a ```rate``` of 0.5 of the normal 
 
 4. **Observe the difference** between maps from `/map` topic (raw map) and `/modified_map` topic (optimized map). Similarly observe the difference between `/path` (yellow) and `/modified_path` (green) topics. Unfortunately, there is no ground truth localization for this data, but you can see the map optimization process based on loop closure mechanism.
 
-   **Loop closure** is a technique in SLAM where the system recognizes when the robot has returned to a previously visited location. When a loop closure is detected, the system can correct accumulated drift errors by adjusting the entire trajectory and map. This results in a more accurate and consistent map, especially for long trajectories where odometry errors would otherwise accumulate.
-
 ## KITTI 00
 
 A bag file with 200 first scans from the 00 sequence of the [KITTI](https://www.cvlibs.net/datasets/kitti/) dataset was prepared. The data also contain *ground truth* localization, which can be used to assess the system performance.
@@ -398,8 +397,6 @@ Analyze the [lidarslam](https://github.com/rsasaki0109/lidarslam_ros2) documenta
 
 1. `ndt_resolution`
 2. `trans_for_mapupdate`
-3. `map_publish_period`
-4. `scan_period`
 5. `voxel_leaf_size`
 6. `loop_detection_period`
 7. `threshold_loop_closure_score`

@@ -241,7 +241,7 @@ ros2 run orbslam3 rgbd /arm_ws/src/orbslam3_ros2/vocabulary/ORBvoc.txt /arm_ws/s
 
 5. Replay the bag file:
 ```bash
-ros2 bag play -r 0.25 bags/rgbd_dataset_freiburg2_desk_with_person -p --remap /camera/rgb/image_color:=/camera/rgb /camera/depth/image:=/camera/depth
+ros2 bag play -r 0.25 bags/rgbd_dataset_freiburg2_large_with_loop -p --remap /camera/rgb/image_color:=/camera/rgb /camera/depth/image:=/camera/depth
 ```
 Observe how the keyframes are optimized throughout the sequence, especially at the end after the loop was detected.
 
@@ -287,7 +287,7 @@ ros2 run orbslam3 rgbd /arm_ws/src/orbslam3_ros2/vocabulary/ORBvoc.txt /arm_ws/s
 
 b. Replay the bag file:
 ```bash
-ros2 bag play -r 0.25 bags/rgbd_dataset_freiburg2_desk_with_person -p --remap /camera/rgb/image_color:=/camera/rgb /camera/depth/image:=/camera/depth
+ros2 bag play -r 0.25 bags/rgbd_dataset_freiburg2_large_with_loop -p --remap /camera/rgb/image_color:=/camera/rgb /camera/depth/image:=/camera/depth
 ```
 
 11. Evaluate the quality of localization:

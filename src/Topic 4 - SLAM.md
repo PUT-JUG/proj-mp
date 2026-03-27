@@ -14,7 +14,7 @@ ORB-SLAM3 system consist of three threads:
 
 The threads work asynchronously, which leads to obtaining slightly different results upon different runs.
 
-### Steps of ORB SLAM3 processes:
+<!-- ### Steps of ORB SLAM3 processes:
 Tracking:
 
 1. Detection and description of ORB features in the image.
@@ -25,7 +25,7 @@ Mapping:
 
 4. Verification if the frame is a key one (needed for improving the system accuracy).
 5. Finding additional matches to the recently seen features from the map.
-6. Transformation correction.
+6. Transformation correction. -->
 
 
 # Environment preparation
@@ -82,7 +82,7 @@ alt="Example calibration images." width=60%>
 </figure>
 
 ## Stereo vision camera calibration
-To run the stereo vision version of the ORB-SLAM3 on our data, we have to provide the parameters of the used camera configuration. The initially prepared configuration file is at `/arm_ws/src/orbslam3_ros2/config/stereo/PP.yaml` directory. Current values are correct for a different camera configuration, so the task is to correct the values. Normally you need to adjust the following parameters:a
+To run the stereo vision version of the ORB-SLAM3 on our data, we have to provide the parameters of the used camera configuration. The initially prepared configuration file is at `/arm_ws/src/orbslam3_ros2/config/stereo/PP.yaml` directory. Current values are correct for a different camera configuration, so the task is to correct the values. Normally you need to adjust the following parameters:
 
 - `Camera.fx` - focal length
 - `Camera.fy` - focal length
